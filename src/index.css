@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "Consolas", "Courier New", monospace;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: #1f2937;
+    font-family: var(--font-sans);
+  }
+
+  ::selection {
+    background-color: #dbeafe;
+    color: #1e3a5f;
+  }
+}
+
+/*
+ * Simple range slider
+ */
+@layer components {
+  .bloch-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    border-radius: 4px;
+    background: #e5e7eb;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .bloch-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #3b82f6;
+    cursor: grab;
+  }
+
+  .bloch-slider::-webkit-slider-thumb:active {
+    cursor: grabbing;
+    background: #2563eb;
+  }
+
+  .bloch-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: none;
+    background: #3b82f6;
+    cursor: grab;
+  }
+
+  .bloch-slider::-moz-range-track {
+    height: 4px;
+    border-radius: 4px;
+    background: #e5e7eb;
+  }
+}
+
+/* Lightbox fade-in animation */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 0.15s ease-out;
+}
