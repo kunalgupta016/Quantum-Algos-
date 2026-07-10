@@ -43,4 +43,17 @@ export async function runAlgorithm(algorithmId, parameters) {
   return response.data;
 }
 
+/**
+ * Runs user-provided Python code in the sandbox.
+ *
+ * @param {string} code — Python code to execute
+ * @returns {Object} — { images: string[], console: string, error: string|null }
+ */
+export async function runSandboxCode(payload) {
+  // payload can be a string (backward compatibility) or { cells: [code1, code2] }
+  const body = typeof payload === "string" ? { code: payload } : payload;
+  const response = await apiClient.post("/sandbox/run", body);
+  return response.data;
+}
+
 export default apiClient;

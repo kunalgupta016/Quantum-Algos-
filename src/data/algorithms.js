@@ -9,7 +9,6 @@
  * - formula: LaTeX or plain-text math formula
  * - timeComplexity: Big-O notation
  * - spaceComplexity: Big-O notation
- * - applications: list of real-world uses
  * - reference: link to paper or resource
  * - category: grouping tag
  * - parameters: dynamic input fields (drives ParameterInput)
@@ -36,12 +35,6 @@ const algorithms = [
     formula: "O(√N) oracle queries",
     timeComplexity: "O(√N)",
     spaceComplexity: "O(log N)",
-    applications: [
-      "Database search",
-      "Cryptanalysis",
-      "Optimization problems",
-      "SAT solving",
-    ],
     reference: "https://arxiv.org/abs/quant-ph/9605043",
     category: CATEGORIES.SEARCH,
     parameters: [
@@ -76,11 +69,6 @@ const algorithms = [
     formula: "f(0) ⊕ f(1) with 1 query",
     timeComplexity: "O(1)",
     spaceComplexity: "O(1)",
-    applications: [
-      "Foundational quantum computing",
-      "Quantum oracle analysis",
-      "Teaching quantum mechanics",
-    ],
     reference: "https://doi.org/10.1098/rspa.1985.0070",
     category: CATEGORIES.SEARCH,
     parameters: [
@@ -106,11 +94,6 @@ const algorithms = [
     formula: "1 query vs 2^(n-1)+1 classical",
     timeComplexity: "O(1) quantum queries",
     spaceComplexity: "O(n)",
-    applications: [
-      "Function classification",
-      "Quantum advantage demonstration",
-      "Algorithm education",
-    ],
     reference: "https://doi.org/10.1098/rspa.1992.0167",
     category: CATEGORIES.SEARCH,
     parameters: [
@@ -137,12 +120,6 @@ const algorithms = [
     formula: "|ψ⟩ = α|0⟩ + β|1⟩ → teleported via Bell measurement",
     timeComplexity: "O(1)",
     spaceComplexity: "O(1)",
-    applications: [
-      "Quantum communication",
-      "Quantum internet",
-      "Distributed quantum computing",
-      "Quantum key distribution",
-    ],
     reference: "https://doi.org/10.1103/PhysRevLett.70.1895",
     category: CATEGORIES.CRYPTOGRAPHY,
     parameters: [
@@ -170,12 +147,6 @@ const algorithms = [
     formula: "QFT|j⟩ = (1/√N) Σₖ e^(2πijk/N) |k⟩",
     timeComplexity: "O(n²) vs O(n·2ⁿ) classical",
     spaceComplexity: "O(n)",
-    applications: [
-      "Shor's algorithm subroutine",
-      "Phase estimation",
-      "Quantum signal processing",
-      "Period finding",
-    ],
     reference: "https://arxiv.org/abs/quant-ph/0201067",
     category: CATEGORIES.TRANSFORM,
     parameters: [
@@ -205,11 +176,6 @@ const algorithms = [
     formula: "O((log N)³) with quantum period finding",
     timeComplexity: "O((log N)³)",
     spaceComplexity: "O(log N)",
-    applications: [
-      "Cryptanalysis (RSA breaking)",
-      "Number theory",
-      "Post-quantum cryptography motivation",
-    ],
     reference: "https://arxiv.org/abs/quant-ph/9508027",
     category: CATEGORIES.FACTORING,
     parameters: [
@@ -239,11 +205,6 @@ const algorithms = [
     formula: "O(n) quantum queries vs O(2^(n/2)) classical",
     timeComplexity: "O(n)",
     spaceComplexity: "O(n)",
-    applications: [
-      "Cryptanalysis",
-      "Period finding",
-      "Foundation for Shor's algorithm",
-    ],
     reference: "https://doi.org/10.1137/S0097539796298637",
     category: CATEGORIES.CRYPTOGRAPHY,
     parameters: [
@@ -272,11 +233,6 @@ const algorithms = [
     formula: "f(x) = s·x mod 2 → find s in 1 query",
     timeComplexity: "O(1) quantum queries",
     spaceComplexity: "O(n)",
-    applications: [
-      "Quantum query complexity",
-      "Learning theory",
-      "Quantum advantage demonstration",
-    ],
     reference: "https://doi.org/10.1137/S0097539796300921",
     category: CATEGORIES.CRYPTOGRAPHY,
     parameters: [
@@ -303,12 +259,6 @@ const algorithms = [
     formula: "U|ψ⟩ = e^(2πiθ)|ψ⟩ → estimate θ to n bits",
     timeComplexity: "O(n²) for n-bit precision",
     spaceComplexity: "O(n)",
-    applications: [
-      "Shor's algorithm",
-      "Quantum chemistry",
-      "Hamiltonian simulation",
-      "Eigenvalue problems",
-    ],
     reference: "https://arxiv.org/abs/quant-ph/9511026",
     category: CATEGORIES.TRANSFORM,
     parameters: [
@@ -328,6 +278,78 @@ const algorithms = [
       ],
     },
   },
+  {
+    id: "superdense-coding",
+    name: "Superdense Coding",
+    shortDescription:
+      "Transmit two classical bits using one qubit.",
+    description:
+      "Superdense coding is a quantum communication protocol to communicate two classical bits of information by only transmitting one qubit, given a pre-shared entangled pair.",
+    formula: "1 Qubit ➔ 2 Classical Bits",
+    timeComplexity: "O(1)",
+    spaceComplexity: "O(1)",
+    reference: "https://doi.org/10.1103/PhysRevLett.69.2881",
+    category: CATEGORIES.CRYPTOGRAPHY,
+    parameters: [
+      { name: "Message (2 bits)", type: "select", options: ["00", "01", "10", "11"], default: "10" },
+    ],
+    mockOutput: {
+      graph: { type: "bar", labels: ["00", "01", "10", "11"], values: [0, 0, 1.0, 0] },
+      circuit: { gates: ["H", "CNOT", "Z", "X", "CNOT", "H"], qubits: 2, depth: 6 },
+      blochSphere: null,
+      console: "Alice's message: '10'\nSuperdense Coding protocol executed successfully.\nBob measured: '10'",
+      measurements: [
+        { state: "|10⟩", probability: 1.0, count: 1000 },
+      ],
+    },
+  },
+  {
+    id: "vqe",
+    name: "Variational Quantum Eigensolver (VQE)",
+    shortDescription:
+      "Hybrid algorithm to find ground state energies.",
+    description:
+      "VQE is a hybrid quantum-classical algorithm that uses a variational technique to find the minimum eigenvalue of the Hamiltonian of a given system. It is considered a flagship algorithm for the NISQ era.",
+    formula: "min_θ ⟨ψ(θ)|H|ψ(θ)⟩ ≥ E_0",
+    timeComplexity: "O(poly(N)) per iteration",
+    spaceComplexity: "O(N)",
+    reference: "https://doi.org/10.1038/ncomms5213",
+    category: CATEGORIES.SIMULATION,
+    parameters: [
+      { name: "Molecule", type: "select", options: ["H2", "LiH", "BeH2"], default: "H2" },
+      { name: "Max Iterations", type: "number", default: 100, min: 10, max: 1000 },
+    ],
+    mockOutput: {
+      graph: { type: "line", labels: ["Iter 1", "Iter 10", "Iter 20", "Iter 30"], values: [-0.5, -0.9, -1.1, -1.137] },
+      circuit: { gates: ["Ry", "CNOT", "Ry", "Measure"], qubits: 2, depth: 4 },
+      blochSphere: null,
+      console: "VQE Optimization Loop Started...\nIteration 10: Energy = -0.9 Hartree\nIteration 30: Converged.\nEstimated Ground State Energy for H2: -1.137 Hartree",
+      measurements: [],
+    },
+  },
+  {
+    id: "bb84",
+    name: "BB84 Protocol",
+    shortDescription:
+      "Provably secure quantum key distribution.",
+    description:
+      "BB84 is the first quantum cryptography protocol. It provides a secure way to distribute a private key over an insecure channel by utilizing quantum states (photons) and the no-cloning theorem.",
+    formula: "Key distribution using non-orthogonal bases",
+    timeComplexity: "O(N) for N bits",
+    spaceComplexity: "O(1)",
+    reference: "https://doi.org/10.1016/j.tcs.2014.05.025",
+    category: CATEGORIES.CRYPTOGRAPHY,
+    parameters: [
+      { name: "Number of Bits", type: "number", default: 10, min: 1, max: 100 },
+    ],
+    mockOutput: {
+      graph: { type: "bar", labels: ["Matches", "Mismatches"], values: [0.5, 0.5] },
+      circuit: { gates: ["X", "H", "Measure"], qubits: 1, depth: 3 },
+      blochSphere: null,
+      console: "Alice's Bases: [0 1 1 0 1 ...]\nBob's Bases: [1 1 0 0 1 ...]\nMatches found: 5\nSecret Key: [1, 0, 1, 1, 0]\nEavesdropper check passed! No errors detected.",
+      measurements: [],
+    },
+  }
 ];
 
 export default algorithms;

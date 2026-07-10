@@ -14,12 +14,12 @@ const PRESETS = [
 ];
 
 const GATES = [
-  { id: "X", label: "X (NOT)", color: "bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200" },
-  { id: "Y", label: "Y", color: "bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200" },
-  { id: "Z", label: "Z (Phase)", color: "bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200" },
-  { id: "H", label: "H (Hadamard)", color: "bg-purple-100 text-purple-700 hover:bg-purple-200 border-purple-200" },
-  { id: "S", label: "S", color: "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 border-indigo-200" },
-  { id: "T", label: "T", color: "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 border-indigo-200" },
+  { id: "X", label: "X (NOT)", color: "bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/30" },
+  { id: "Y", label: "Y", color: "bg-green-500/20 text-green-400 hover:bg-green-500/30 border-green-500/30" },
+  { id: "Z", label: "Z (Phase)", color: "bg-[var(--color-app-primary)]/20 text-[var(--color-app-primary)] hover:bg-[var(--color-app-primary)]/30 border-[var(--color-app-primary)]/30" },
+  { id: "H", label: "H (Hadamard)", color: "bg-[var(--color-app-accent)]/20 text-[var(--color-app-accent)] hover:bg-[var(--color-app-accent)]/30 border-[var(--color-app-accent)]/30" },
+  { id: "S", label: "S", color: "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 border-purple-500/30" },
+  { id: "T", label: "T", color: "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 border-purple-500/30" },
 ];
 
 export default function BlochSphereViewer({ blochData }) {
@@ -116,23 +116,23 @@ export default function BlochSphereViewer({ blochData }) {
   }, [theta, phi]);
 
   return (
-    <div className="rounded border border-gray-200 bg-white p-4">
+    <div className="rounded-lg app-glass p-4">
       {/* Header */}
-      <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-3">
-        <h4 className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-500">
-          <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+      <div className="mb-4 flex items-center justify-between border-b border-[var(--color-app-border)] pb-3">
+        <h4 className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-app-accent)]">
+          <svg className="h-4 w-4 text-[var(--color-app-accent-hover)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="10" />
             <path d="M12 2a15 15 0 010 20M2 12h20" />
           </svg>
           Bloch Sphere
         </h4>
         <div className="flex items-center gap-3">
-          <span className="text-[10px] font-normal normal-case text-gray-400 hidden sm:inline-block">
+          <span className="text-xs font-normal normal-case text-[var(--color-app-text-muted)] hidden sm:inline-block">
             Drag to rotate • Scroll to zoom
           </span>
           <button
             onClick={handleFullScreen}
-            className="flex items-center gap-1.5 rounded border border-gray-200 bg-white px-2 py-1 text-[10px] font-semibold text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition"
+            className="flex items-center gap-1.5 rounded-lg border border-[var(--color-app-border)] bg-[var(--color-app-surface-hover)] px-2 py-1 text-xs font-semibold text-[var(--color-app-text-light)] hover:bg-[var(--color-app-surface-alt)] hover:text-[var(--color-app-primary)] transition"
           >
             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
@@ -143,7 +143,7 @@ export default function BlochSphereViewer({ blochData }) {
       </div>
 
       {/* 3D Canvas */}
-      <div className="relative mx-auto aspect-square max-w-sm overflow-hidden rounded border border-gray-200 bg-gray-50">
+      <div className="relative mx-auto aspect-square max-w-sm overflow-hidden rounded-lg border border-[var(--color-app-border)] bg-[var(--color-app-base)]">
         <Canvas
           camera={{ position: [3, 2.5, 3], fov: 40 }}
           gl={{ antialias: true, alpha: true }}
@@ -167,10 +167,10 @@ export default function BlochSphereViewer({ blochData }) {
         {/* Theta slider */}
         <div>
           <div className="mb-1 flex items-center justify-between">
-            <label className="text-xs font-semibold text-gray-600">
+            <label className="text-xs font-semibold text-[var(--color-app-text-light)]">
               θ (Polar angle)
             </label>
-            <span className="font-mono text-xs text-orange-600 font-semibold">
+            <span className="font-mono text-xs text-[var(--color-app-accent)] font-semibold">
               {theta.toFixed(3)} rad ({((theta * 180) / Math.PI).toFixed(1)}°)
             </span>
           </div>
@@ -183,7 +183,7 @@ export default function BlochSphereViewer({ blochData }) {
             onChange={(e) => setTheta(parseFloat(e.target.value))}
             className="bloch-slider w-full"
           />
-          <div className="mt-0.5 flex justify-between text-[9px] text-gray-400 font-mono">
+          <div className="mt-0.5 flex justify-between text-xs text-[var(--color-app-text-muted)] font-mono">
             <span>0 (|0⟩)</span>
             <span>π/2</span>
             <span>π (|1⟩)</span>
@@ -193,10 +193,10 @@ export default function BlochSphereViewer({ blochData }) {
         {/* Phi slider */}
         <div>
           <div className="mb-1 flex items-center justify-between">
-            <label className="text-xs font-semibold text-gray-600">
+            <label className="text-xs font-semibold text-[var(--color-app-text-light)]">
               φ (Azimuthal angle)
             </label>
-            <span className="font-mono text-xs text-indigo-600 font-semibold">
+            <span className="font-mono text-xs text-[var(--color-app-primary)] font-semibold">
               {phi.toFixed(3)} rad ({((phi * 180) / Math.PI).toFixed(1)}°)
             </span>
           </div>
@@ -209,7 +209,7 @@ export default function BlochSphereViewer({ blochData }) {
             onChange={(e) => setPhi(parseFloat(e.target.value))}
             className="bloch-slider w-full"
           />
-          <div className="mt-0.5 flex justify-between text-[9px] text-gray-400 font-mono">
+          <div className="mt-0.5 flex justify-between text-xs text-[var(--color-app-text-muted)] font-mono">
             <span>0 (|+⟩)</span>
             <span>π</span>
             <span>2π</span>
@@ -218,7 +218,7 @@ export default function BlochSphereViewer({ blochData }) {
 
         {/* Presets */}
         <div>
-          <p className="mb-2 text-xs font-semibold text-gray-600">
+          <p className="mb-2 text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-app-text-muted)]">
             Quick Presets
           </p>
           <div className="flex flex-wrap gap-1.5">
@@ -226,7 +226,7 @@ export default function BlochSphereViewer({ blochData }) {
               <button
                 key={preset.label}
                 onClick={() => handlePreset(preset)}
-                className="rounded border border-gray-300 bg-white px-2 py-1 font-mono text-xs text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+                className="rounded-lg border border-[var(--color-app-border-light)] bg-[var(--color-app-surface-hover)] px-2.5 py-1 font-mono text-xs text-[var(--color-app-text-light)] hover:bg-[var(--color-app-surface-alt)] hover:text-[var(--color-app-primary)] hover:border-[var(--color-app-primary)]/30 transition-colors"
               >
                 {preset.label}
               </button>
@@ -236,7 +236,7 @@ export default function BlochSphereViewer({ blochData }) {
 
         {/* Quantum Gates */}
         <div>
-          <p className="mb-2 text-xs font-semibold text-gray-600">
+          <p className="mb-2 text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-app-text-muted)]">
             Apply Quantum Gates
           </p>
           <div className="flex flex-wrap gap-2">
@@ -244,7 +244,7 @@ export default function BlochSphereViewer({ blochData }) {
               <button
                 key={gate.id}
                 onClick={() => applyGate(gate.id)}
-                className={`rounded border px-2.5 py-1 text-[11px] font-bold shadow-sm transition-transform active:scale-95 ${gate.color}`}
+                className={`rounded-lg border px-2.5 py-1 text-xs font-bold transition-transform active:scale-95 ${gate.color}`}
                 title={`Apply ${gate.label} gate`}
               >
                 {gate.label}
@@ -254,17 +254,17 @@ export default function BlochSphereViewer({ blochData }) {
         </div>
 
         {/* State readout */}
-        <div className="rounded border border-gray-200 bg-gray-50 p-3">
-          <p className="mb-1 text-[9px] font-bold uppercase tracking-wider text-gray-400">
+        <div className="rounded-lg bg-[var(--color-app-base)] border border-[var(--color-app-border)] p-3">
+          <p className="mb-1 text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-app-text-muted)]">
             Qubit State Representation
           </p>
-          <p className="font-mono text-xs text-gray-800">
+          <p className="font-mono text-xs text-[var(--color-app-text-main)]">
             |ψ⟩ ={" "}
-            <span className="text-blue-600 font-bold">{alpha}</span>
-            <span className="text-gray-500">|0⟩</span>
+            <span className="text-[var(--color-app-primary)] font-bold">{alpha}</span>
+            <span className="text-[var(--color-app-text-muted)]">|0⟩</span>
             {" + "}
-            <span className="text-indigo-600 font-bold">{beta}</span>
-            <span className="text-gray-500">|1⟩</span>
+            <span className="text-[var(--color-app-accent)] font-bold">{beta}</span>
+            <span className="text-[var(--color-app-text-muted)]">|1⟩</span>
           </p>
         </div>
       </div>

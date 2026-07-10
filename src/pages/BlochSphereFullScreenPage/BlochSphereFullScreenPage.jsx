@@ -14,12 +14,13 @@ const PRESETS = [
 ];
 
 const GATES = [
-  { id: "X", label: "X (NOT)", color: "bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200" },
-  { id: "Y", label: "Y", color: "bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200" },
-  { id: "Z", label: "Z (Phase)", color: "bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200" },
-  { id: "H", label: "H (Hadamard)", color: "bg-purple-100 text-purple-700 hover:bg-purple-200 border-purple-200" },
-  { id: "S", label: "S", color: "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 border-indigo-200" },
-  { id: "T", label: "T", color: "bg-indigo-100 text-indigo-700 hover:bg-indigo-200 border-indigo-200" },
+  { id: "X", label: "X (NOT)", color: "bg-red-500/20 text-red-400 hover:bg-red-500/30 border-red-500/30" },
+  { id: "Y", label: "Y", color: "bg-green-500/20 text-green-400 hover:bg-green-500/30 border-green-500/30" },
+  { id: "Z", label: "Z (Phase)", color: "bg-[var(--color-app-primary)]/20 text-[var(--color-app-primary)] hover:bg-[var(--color-app-primary)]/30 border-[var(--color-app-primary)]/30" },
+  { id: "H", label: "H (Hadamard)", color: "bg-[var(--color-app-accent)]/20 text-[var(--color-app-accent)] hover:bg-[var(--color-app-accent)]/30 border-[var(--color-app-accent)]/30" },
+  { id: "S", label: "S", color: "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 border-purple-500/30" },
+  { id: "T", label: "T", color: "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 border-purple-500/30" },
+  { id: "CX", label: "CX (ctrl=1)", color: "bg-pink-500/20 text-pink-400 hover:bg-pink-500/30 border-pink-500/30" },
 ];
 
 export default function BlochSphereFullScreenPage() {
@@ -48,6 +49,7 @@ export default function BlochSphereFullScreenPage() {
 
     switch (gateId) {
       case "X":
+      case "CX": // CX with control=1 acts exactly like X
         newAR = bR; newAI = bI;
         newBR = a; newBI = 0;
         break;
@@ -116,29 +118,32 @@ export default function BlochSphereFullScreenPage() {
   }, [theta, phi]);
 
   return (
-    <div className="flex h-screen w-screen flex-col bg-gray-50 text-gray-900">
+    <div className="flex h-screen w-screen flex-col bg-[var(--color-app-base)] text-[var(--color-app-text-main)]">
       {/* Top Bar */}
-      <div className="flex items-center justify-between bg-white px-6 py-4 shadow-sm border-b border-gray-200">
-        <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-          <svg className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 2a15 15 0 010 20M2 12h20" />
-          </svg>
+      <div className="flex items-center justify-between bg-[var(--color-app-surface)] px-6 py-4 border-b border-[var(--color-app-border)]">
+        <h1 className="text-xs font-bold flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--color-app-primary)] to-[var(--color-app-primary-hover)]">
+            <svg className="h-4 w-4 text-[var(--color-app-base)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 2a15 15 0 010 20M2 12h20" />
+            </svg>
+          </div>
           Bloch Sphere Explorer
         </h1>
         <button
           onClick={() => navigate(-1)}
-          className="rounded border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition shadow-sm"
+          className="rounded-lg border border-[var(--color-app-border)] bg-[var(--color-app-surface-hover)] px-4 py-2 text-xs font-semibold text-[var(--color-app-text-light)] hover:bg-[var(--color-app-surface-alt)] hover:text-[var(--color-app-text-main)] transition"
         >
-          Close Full Screen
+          ← Back
         </button>
       </div>
+      <div className="app-gradient-line" />
 
       <div className="flex flex-1 flex-col lg:flex-row overflow-hidden">
         {/* Left Side: 3D Canvas */}
-        <div className="flex-1 relative border-r border-gray-200 bg-white flex items-center justify-center p-8">
-          <div className="absolute top-4 left-4 text-xs font-semibold text-gray-400 tracking-wider">
-            DRAG TO ROTATE • SCROLL TO ZOOM
+        <div className="flex-1 relative border-r border-[var(--color-app-border)] bg-[var(--color-app-base)] flex items-center justify-center p-8">
+          <div className="absolute top-4 left-4 text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-app-text-muted)]">
+            Drag to rotate • Scroll to zoom
           </div>
           <div className="w-full h-full max-w-5xl max-h-5xl">
             <Canvas
@@ -161,34 +166,34 @@ export default function BlochSphereFullScreenPage() {
         </div>
 
         {/* Right Side: Controls */}
-        <div className="w-full lg:w-96 bg-gray-50 p-6 overflow-y-auto flex flex-col gap-8 shadow-inner border-l border-gray-200">
+        <div className="w-full lg:w-96 bg-[var(--color-app-surface)] p-6 overflow-y-auto flex flex-col gap-8 border-l border-[var(--color-app-border)]">
           
           {/* State readout */}
-          <div className="rounded border border-gray-200 bg-white p-5 shadow-sm">
-            <p className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-gray-100 pb-2">
+          <div className="rounded-lg app-glass p-5">
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-app-accent)] border-b border-[var(--color-app-border)] pb-2">
               Qubit State
             </p>
-            <p className="font-mono text-xl text-gray-800 leading-relaxed">
+            <p className="font-mono text-xs leading-relaxed">
               |ψ⟩ = <br/>
-              <span className="text-blue-600 font-bold">{alpha}</span>
-              <span className="text-gray-500">|0⟩</span>
+              <span className="text-[var(--color-app-primary)] font-bold">{alpha}</span>
+              <span className="text-[var(--color-app-text-muted)]">|0⟩</span>
               {" + "}<br/>
-              <span className="text-indigo-600 font-bold">{beta}</span>
-              <span className="text-gray-500">|1⟩</span>
+              <span className="text-[var(--color-app-accent)] font-bold">{beta}</span>
+              <span className="text-[var(--color-app-text-muted)]">|1⟩</span>
             </p>
           </div>
 
           {/* Controls */}
           <div className="space-y-6">
-            <h3 className="font-bold text-gray-800 text-base uppercase tracking-wider text-gray-500 border-b border-gray-200 pb-2">Controls</h3>
+            <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-app-accent)] border-b border-[var(--color-app-border)] pb-2">Controls</h3>
             
             {/* Theta slider */}
             <div>
               <div className="mb-2 flex items-center justify-between">
-                <label className="text-sm font-semibold text-gray-700">
+                <label className="text-xs font-semibold text-[var(--color-app-text-light)]">
                   θ (Polar angle)
                 </label>
-                <span className="font-mono text-sm text-orange-600 font-semibold bg-orange-50 px-2 py-0.5 rounded border border-orange-100">
+                <span className="font-mono text-xs text-[var(--color-app-accent)] font-semibold bg-[var(--color-app-accent)]/10 px-2 py-0.5 rounded-lg border border-[var(--color-app-accent)]/20">
                   {theta.toFixed(3)} rad ({((theta * 180) / Math.PI).toFixed(1)}°)
                 </span>
               </div>
@@ -201,7 +206,7 @@ export default function BlochSphereFullScreenPage() {
                 onChange={(e) => setTheta(parseFloat(e.target.value))}
                 className="bloch-slider w-full mt-2"
               />
-              <div className="mt-2 flex justify-between text-xs text-gray-400 font-mono">
+              <div className="mt-2 flex justify-between text-xs text-[var(--color-app-text-muted)] font-mono">
                 <span>0 (|0⟩)</span>
                 <span>π/2</span>
                 <span>π (|1⟩)</span>
@@ -211,10 +216,10 @@ export default function BlochSphereFullScreenPage() {
             {/* Phi slider */}
             <div>
               <div className="mb-2 flex items-center justify-between">
-                <label className="text-sm font-semibold text-gray-700">
+                <label className="text-xs font-semibold text-[var(--color-app-text-light)]">
                   φ (Azimuthal angle)
                 </label>
-                <span className="font-mono text-sm text-indigo-600 font-semibold bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                <span className="font-mono text-xs text-[var(--color-app-primary)] font-semibold bg-[var(--color-app-primary)]/10 px-2 py-0.5 rounded-lg border border-[var(--color-app-primary)]/20">
                   {phi.toFixed(3)} rad ({((phi * 180) / Math.PI).toFixed(1)}°)
                 </span>
               </div>
@@ -227,7 +232,7 @@ export default function BlochSphereFullScreenPage() {
                 onChange={(e) => setPhi(parseFloat(e.target.value))}
                 className="bloch-slider w-full mt-2"
               />
-              <div className="mt-2 flex justify-between text-xs text-gray-400 font-mono">
+              <div className="mt-2 flex justify-between text-xs text-[var(--color-app-text-muted)] font-mono">
                 <span>0 (|+⟩)</span>
                 <span>π</span>
                 <span>2π</span>
@@ -237,7 +242,7 @@ export default function BlochSphereFullScreenPage() {
 
           {/* Presets */}
           <div>
-            <p className="mb-4 text-sm font-bold uppercase tracking-wider text-gray-500 border-b border-gray-200 pb-2">
+            <p className="mb-4 text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-app-accent)] border-b border-[var(--color-app-border)] pb-2">
               Quick Presets
             </p>
             <div className="grid grid-cols-2 gap-3">
@@ -245,7 +250,7 @@ export default function BlochSphereFullScreenPage() {
                 <button
                   key={preset.label}
                   onClick={() => handlePreset(preset)}
-                  className="rounded border border-gray-300 bg-white px-3 py-2 font-mono text-sm text-gray-700 hover:bg-blue-50 transition-colors hover:border-blue-300 hover:text-blue-700 shadow-sm font-bold"
+                  className="rounded-lg border border-[var(--color-app-border-light)] bg-[var(--color-app-surface-hover)] px-3 py-2 font-mono text-xs text-[var(--color-app-text-light)] hover:bg-[var(--color-app-surface-alt)] hover:text-[var(--color-app-primary)] hover:border-[var(--color-app-primary)]/30 transition-colors font-bold"
                 >
                   {preset.label}
                 </button>
@@ -255,7 +260,7 @@ export default function BlochSphereFullScreenPage() {
 
           {/* Quantum Gates */}
           <div>
-            <p className="mb-4 mt-6 text-sm font-bold uppercase tracking-wider text-gray-500 border-b border-gray-200 pb-2">
+            <p className="mb-4 text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-app-accent)] border-b border-[var(--color-app-border)] pb-2">
               Apply Quantum Gates
             </p>
             <div className="grid grid-cols-2 gap-3">
@@ -263,7 +268,7 @@ export default function BlochSphereFullScreenPage() {
                 <button
                   key={gate.id}
                   onClick={() => applyGate(gate.id)}
-                  className={`rounded border px-3 py-2 text-sm font-bold shadow-sm transition-transform active:scale-95 ${gate.color}`}
+                  className={`rounded-lg border px-3 py-2 text-xs font-bold transition-transform active:scale-95 ${gate.color}`}
                   title={`Apply ${gate.label} gate`}
                 >
                   {gate.label}

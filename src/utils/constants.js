@@ -2,13 +2,18 @@
  * Application-wide constants
  */
 export const APP_NAME = "QuantumLab";
-export const APP_TAGLINE = "Explore the Quantum Universe";
+export const APP_TAGLINE = "Quantum Algorithm Research Platform";
 export const APP_DESCRIPTION =
-  "An interactive platform for learning and experimenting with quantum algorithms.";
+  "An interactive platform for quantum algorithm research, simulation, and experimentation using Qiskit.";
+
+export const APP_ORG = "Quantum Platform";
+export const APP_ORG_SHORT = "QP";
 
 export const NAV_LINKS = [
   { label: "Home", path: "/" },
-  { label: "Algorithms", path: "/" },
+  { label: "Bloch Sphere", path: "/blochsphere" },
+  { label: "Circuit Simulator", path: "/circuit-simulator" },
+  { label: "Sandbox", path: "/sandbox" },
 ];
 
 export const COMPLEXITY_LABELS = {

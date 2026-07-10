@@ -2,14 +2,16 @@ export default function AlgorithmCard({ algorithm, isActive, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left px-3 py-2 rounded text-xs transition-colors block ${
+      className={`w-full text-left px-3 py-2.5 rounded-lg text-xs transition-all duration-200 block ${
         isActive
-          ? "bg-blue-50 text-blue-700 font-medium border border-blue-200"
-          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border border-transparent"
+          ? "bg-[var(--color-app-primary-glow)] text-[var(--color-app-primary)] border-l-2 border-[var(--color-app-primary)] app-glow-border"
+          : "text-[var(--color-app-text-light)] hover:bg-[rgba(255,255,255,0.04)] hover:text-[var(--color-app-text-main)] border-l-2 border-transparent"
       }`}
     >
-      <div className="font-semibold">{algorithm.name}</div>
-      <div className="text-[10px] text-gray-400 mt-0.5 line-clamp-1">
+      <div className={`font-semibold text-xs ${isActive ? "text-[var(--color-app-text-main)]" : ""}`}>
+        {algorithm.name}
+      </div>
+      <div className={`text-xs mt-0.5 line-clamp-1 ${isActive ? "text-[var(--color-app-primary)]" : "text-[var(--color-app-text-muted)]"}`}>
         {algorithm.shortDescription}
       </div>
     </button>

@@ -17,7 +17,6 @@ const algorithms = [
     formula: "O(√N) oracle queries",
     timeComplexity: "O(√N)",
     spaceComplexity: "O(log N)",
-    applications: ["Database search", "Cryptanalysis", "Optimization problems", "SAT solving"],
     reference: "https://arxiv.org/abs/quant-ph/9605043",
     category: "Search",
     parameters: [
@@ -35,7 +34,7 @@ const algorithms = [
     formula: "f(0) ⊕ f(1) with 1 query",
     timeComplexity: "O(1)",
     spaceComplexity: "O(1)",
-    applications: ["Foundational quantum computing", "Quantum oracle analysis"],
+    
     reference: "https://doi.org/10.1098/rspa.1985.0070",
     category: "Search",
     parameters: [
@@ -51,7 +50,7 @@ const algorithms = [
     formula: "1 query vs 2^(n-1)+1 classical",
     timeComplexity: "O(1) quantum queries",
     spaceComplexity: "O(n)",
-    applications: ["Function classification", "Quantum advantage demonstration"],
+    
     reference: "https://doi.org/10.1098/rspa.1992.0167",
     category: "Search",
     parameters: [
@@ -68,7 +67,6 @@ const algorithms = [
     formula: "|ψ⟩ = α|0⟩ + β|1⟩ → teleported via Bell measurement",
     timeComplexity: "O(1)",
     spaceComplexity: "O(1)",
-    applications: ["Quantum communication", "Quantum internet", "Distributed quantum computing"],
     reference: "https://doi.org/10.1103/PhysRevLett.70.1895",
     category: "Cryptography",
     parameters: [
@@ -85,7 +83,7 @@ const algorithms = [
     formula: "QFT|j⟩ = (1/√N) Σₖ e^(2πijk/N) |k⟩",
     timeComplexity: "O(n²) vs O(n·2ⁿ) classical",
     spaceComplexity: "O(n)",
-    applications: ["Shor's algorithm subroutine", "Phase estimation", "Quantum signal processing"],
+    
     reference: "https://arxiv.org/abs/quant-ph/0201067",
     category: "Transform",
     parameters: [
@@ -102,7 +100,6 @@ const algorithms = [
     formula: "O((log N)³) with quantum period finding",
     timeComplexity: "O((log N)³)",
     spaceComplexity: "O(log N)",
-    applications: ["Cryptanalysis (RSA breaking)", "Number theory", "Post-quantum cryptography motivation"],
     reference: "https://arxiv.org/abs/quant-ph/9508027",
     category: "Factoring",
     parameters: [
@@ -119,7 +116,6 @@ const algorithms = [
     formula: "O(n) quantum queries vs O(2^(n/2)) classical",
     timeComplexity: "O(n)",
     spaceComplexity: "O(n)",
-    applications: ["Cryptanalysis", "Period finding", "Foundation for Shor's algorithm"],
     reference: "https://doi.org/10.1137/S0097539796298637",
     category: "Cryptography",
     parameters: [
@@ -136,7 +132,7 @@ const algorithms = [
     formula: "f(x) = s·x mod 2 → find s in 1 query",
     timeComplexity: "O(1) quantum queries",
     spaceComplexity: "O(n)",
-    applications: ["Quantum query complexity", "Learning theory"],
+    
     reference: "https://doi.org/10.1137/S0097539796300921",
     category: "Cryptography",
     parameters: [
@@ -153,7 +149,7 @@ const algorithms = [
     formula: "U|ψ⟩ = e^(2πiθ)|ψ⟩ → estimate θ to n bits",
     timeComplexity: "O(n²) for n-bit precision",
     spaceComplexity: "O(n)",
-    applications: ["Shor's algorithm", "Quantum chemistry", "Hamiltonian simulation"],
+    
     reference: "https://arxiv.org/abs/quant-ph/9511026",
     category: "Transform",
     parameters: [
@@ -161,6 +157,50 @@ const algorithms = [
       { name: "Phase (θ)", type: "number", default: 0.25, min: 0, max: 1, step: 0.01 },
     ],
   },
+  {
+    id: "superdense-coding",
+    name: "Superdense Coding",
+    shortDescription: "Transmit two classical bits using one qubit.",
+    description: "Superdense coding is a quantum communication protocol to communicate two classical bits of information by only transmitting one qubit, given a pre-shared entangled pair.",
+    formula: "1 Qubit ➔ 2 Classical Bits",
+    timeComplexity: "O(1)",
+    spaceComplexity: "O(1)",
+    reference: "https://doi.org/10.1103/PhysRevLett.69.2881",
+    category: "Cryptography",
+    parameters: [
+      { name: "Message (2 bits)", type: "select", options: ["00", "01", "10", "11"], default: "10" },
+    ],
+  },
+  {
+    id: "vqe",
+    name: "Variational Quantum Eigensolver (VQE)",
+    shortDescription: "Hybrid algorithm to find ground state energies.",
+    description: "VQE is a hybrid quantum-classical algorithm that uses a variational technique to find the minimum eigenvalue of the Hamiltonian of a given system.",
+    formula: "min_θ ⟨ψ(θ)|H|ψ(θ)⟩ ≥ E_0",
+    timeComplexity: "O(poly(N)) per iteration",
+    spaceComplexity: "O(N)",
+    
+    reference: "https://doi.org/10.1038/ncomms5213",
+    category: "Simulation",
+    parameters: [
+      { name: "Molecule", type: "select", options: ["H2", "LiH", "BeH2"], default: "H2" },
+      { name: "Max Iterations", type: "number", default: 100, min: 10, max: 1000 },
+    ],
+  },
+  {
+    id: "bb84",
+    name: "BB84 Protocol",
+    shortDescription: "Provably secure quantum key distribution.",
+    description: "BB84 provides a secure way to distribute a private key over an insecure channel by utilizing quantum states (photons) and the no-cloning theorem.",
+    formula: "Key distribution using non-orthogonal bases",
+    timeComplexity: "O(N) for N bits",
+    spaceComplexity: "O(1)",
+    reference: "https://doi.org/10.1016/j.tcs.2014.05.025",
+    category: "Cryptography",
+    parameters: [
+      { name: "Number of Bits", type: "number", default: 10, min: 1, max: 100 },
+    ],
+  }
 ];
 
 module.exports = algorithms;

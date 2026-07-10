@@ -6,16 +6,16 @@ import * as THREE from "three";
 const SPHERE_RADIUS = 1.5;
 const AXIS_LENGTH = SPHERE_RADIUS + 0.5;
 
-/* ─── Colors ──────────────────────────────────── */
+/* ─── QL Color Scheme ──────────────────────── */
 const COLORS = {
-  sphere: "#d1d5db",
-  equator: "#9ca3af",
-  xAxis: "#b91c1c",
-  yAxis: "#047857",
-  zAxis: "#1d4ed8",
-  vector: "#1e3a8a",
-  vectorTip: "#2563eb",
-  grid: "#e5e7eb",
+  sphere: "#162d4a",
+  equator: "#1c3a5e",
+  xAxis: "#ff6b6b",
+  yAxis: "#34d399",
+  zAxis: "#00d4ff",
+  vector: "#c7a94e",
+  vectorTip: "#ddc06a",
+  grid: "#1c3a5e",
 };
 
 
@@ -142,18 +142,18 @@ export default function BlochSphere3D({ theta = 0, phi = 0 }) {
         <meshBasicMaterial
           color={COLORS.sphere}
           transparent
-          opacity={0.04}
+          opacity={0.06}
           side={THREE.DoubleSide}
         />
       </mesh>
 
       {/* Grid lines */}
       {gridLines.map((pts, i) => (
-        <Line key={i} points={pts} color={COLORS.grid} lineWidth={0.5} transparent opacity={0.15} />
+        <Line key={i} points={pts} color={COLORS.grid} lineWidth={0.5} transparent opacity={0.12} />
       ))}
 
       {/* Equator */}
-      <Line points={equatorPoints} color={COLORS.equator} lineWidth={1.5} transparent opacity={0.3} />
+      <Line points={equatorPoints} color={COLORS.equator} lineWidth={1.5} transparent opacity={0.25} />
 
       {/* ─── Axes ────────────────────────────── */}
       {/* X axis (red) */}
@@ -162,7 +162,7 @@ export default function BlochSphere3D({ theta = 0, phi = 0 }) {
         color={COLORS.xAxis}
         lineWidth={1.5}
         transparent
-        opacity={0.6}
+        opacity={0.5}
       />
       {/* Y axis (green) */}
       <Line
@@ -170,15 +170,15 @@ export default function BlochSphere3D({ theta = 0, phi = 0 }) {
         color={COLORS.yAxis}
         lineWidth={1.5}
         transparent
-        opacity={0.6}
+        opacity={0.5}
       />
-      {/* Z axis (blue) */}
+      {/* Z axis (blue/cyan) */}
       <Line
         points={[[0, -AXIS_LENGTH, 0], [0, AXIS_LENGTH, 0]]}
         color={COLORS.zAxis}
         lineWidth={1.5}
         transparent
-        opacity={0.6}
+        opacity={0.5}
       />
 
       {/* ─── Axis Labels ────────────────────── */}
@@ -193,33 +193,33 @@ export default function BlochSphere3D({ theta = 0, phi = 0 }) {
       </Text>
 
       {/* ─── Qubit State Labels ──────────────── */}
-      <Text position={[0, SPHERE_RADIUS + 0.35, 0]} fontSize={0.25} color="#1d4ed8" anchorX="center">
+      <Text position={[0, SPHERE_RADIUS + 0.35, 0]} fontSize={0.25} color="#00d4ff" anchorX="center">
         |0⟩
       </Text>
-      <Text position={[0, -SPHERE_RADIUS - 0.35, 0]} fontSize={0.25} color="#1d4ed8" anchorX="center">
+      <Text position={[0, -SPHERE_RADIUS - 0.35, 0]} fontSize={0.25} color="#00d4ff" anchorX="center">
         |1⟩
       </Text>
-      <Text position={[SPHERE_RADIUS + 0.35, 0, 0]} fontSize={0.2} color="#6b7280" anchorX="left">
+      <Text position={[SPHERE_RADIUS + 0.35, 0, 0]} fontSize={0.2} color="#8899aa" anchorX="left">
         |+⟩
       </Text>
-      <Text position={[-SPHERE_RADIUS - 0.35, 0, 0]} fontSize={0.2} color="#6b7280" anchorX="right">
+      <Text position={[-SPHERE_RADIUS - 0.35, 0, 0]} fontSize={0.2} color="#8899aa" anchorX="right">
         |−⟩
       </Text>
-      <Text position={[0, 0, SPHERE_RADIUS + 0.35]} fontSize={0.2} color="#047857" anchorX="left">
+      <Text position={[0, 0, SPHERE_RADIUS + 0.35]} fontSize={0.2} color="#34d399" anchorX="left">
         |i⟩
       </Text>
-      <Text position={[0, 0, -SPHERE_RADIUS - 0.35]} fontSize={0.2} color="#047857" anchorX="right">
+      <Text position={[0, 0, -SPHERE_RADIUS - 0.35]} fontSize={0.2} color="#34d399" anchorX="right">
         |-i⟩
       </Text>
 
       {/* ─── Theta Arc ──────────────────────── */}
       {thetaArc.length > 1 && (
-        <Line points={thetaArc} color="#ea580c" lineWidth={2} transparent opacity={0.8} />
+        <Line points={thetaArc} color="#c7a94e" lineWidth={2} transparent opacity={0.8} />
       )}
 
       {/* ─── Phi Arc ────────────────────────── */}
       {phiArc.length > 1 && (
-        <Line points={phiArc} color="#4f46e5" lineWidth={2} transparent opacity={0.8} />
+        <Line points={phiArc} color="#00d4ff" lineWidth={2} transparent opacity={0.8} />
       )}
 
       {/* ─── Angle Labels (HTML overlays) ──── */}
@@ -232,7 +232,7 @@ export default function BlochSphere3D({ theta = 0, phi = 0 }) {
           ]}
           style={{ pointerEvents: "none" }}
         >
-          <span className="text-[10px] font-mono text-orange-700 font-bold bg-white border border-gray-300 px-1 rounded shadow-sm">θ</span>
+          <span className="text-xs font-mono font-bold px-1.5 py-0.5 rounded" style={{ color: "#c7a94e", background: "rgba(10,22,40,0.9)", border: "1px solid rgba(199,169,78,0.3)" }}>θ</span>
         </Html>
       )}
       {phiArc.length > 1 && (
@@ -244,7 +244,7 @@ export default function BlochSphere3D({ theta = 0, phi = 0 }) {
           ]}
           style={{ pointerEvents: "none" }}
         >
-          <span className="text-[10px] font-mono text-indigo-700 font-bold bg-white border border-gray-300 px-1 rounded shadow-sm">φ</span>
+          <span className="text-xs font-mono font-bold px-1.5 py-0.5 rounded" style={{ color: "#00d4ff", background: "rgba(10,22,40,0.9)", border: "1px solid rgba(0,212,255,0.3)" }}>φ</span>
         </Html>
       )}
 
@@ -265,7 +265,7 @@ export default function BlochSphere3D({ theta = 0, phi = 0 }) {
       {/* Small outer helper ring */}
       <mesh position={stateVec.toArray()}>
         <sphereGeometry args={[0.12, 16, 16]} />
-        <meshBasicMaterial color={COLORS.vectorTip} transparent opacity={0.1} />
+        <meshBasicMaterial color={COLORS.vectorTip} transparent opacity={0.15} />
       </mesh>
 
       {/* ─── Projection line to equator ──────── */}
@@ -275,13 +275,13 @@ export default function BlochSphere3D({ theta = 0, phi = 0 }) {
             stateVec.toArray(),
             [stateVec.x, 0, stateVec.z],
           ]}
-          color="#94a3b8"
+          color="#8899aa"
           lineWidth={1}
           dashed
           dashSize={0.05}
           gapSize={0.05}
           transparent
-          opacity={0.4}
+          opacity={0.3}
         />
       )}
     </group>

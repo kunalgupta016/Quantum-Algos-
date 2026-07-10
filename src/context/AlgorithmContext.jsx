@@ -15,7 +15,7 @@ const AlgorithmContext = createContext(null);
  * - error: any error message
  */
 export function AlgorithmProvider({ children }) {
-  const [algorithmList] = useState(algorithms);
+  const algorithmList = algorithms;
   const [selectedAlgorithm, setSelectedAlgorithm] = useState(null);
   const [parameters, setParameters] = useState({});
   const [result, setResult] = useState(null);
