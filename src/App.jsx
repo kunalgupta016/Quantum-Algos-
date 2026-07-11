@@ -1,17 +1,35 @@
 import { BrowserRouter } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
 import { AlgorithmProvider } from "./context/AlgorithmContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import AppRoutes from "./routes/AppRoutes";
+import useSmoothScroll from "./hooks/useSmoothScroll";
 
 /**
- * Root application component.
- * Wraps everything with BrowserRouter and AlgorithmProvider.
+ * Inner app component that uses the smooth scroll hook.
+ * Must be inside BrowserRouter for hooks to work.
  */
-export default function App() {
+function AppInner() {
+  useSmoothScroll();
+  return <AppRoutes />;
+}
+
+/**
+ * Root Application Component
+ * Wraps the app in ThemeProvider, Router, AuthProvider, and AlgorithmProvider.
+ */
+function App() {
   return (
-    <BrowserRouter>
-      <AlgorithmProvider>
-        <AppRoutes />
-      </AlgorithmProvider>
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <AlgorithmProvider>
+            <AppInner />
+          </AlgorithmProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
+
+export default App;

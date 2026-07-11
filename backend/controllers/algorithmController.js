@@ -1,54 +1,130 @@
 /**
  * Algorithm Simulation Controller
  *
- * Contains the logic for running quantum algorithm simulations.
- * Uses Papermill to execute Qiskit Jupyter notebooks and extracts
- * the resulting circuit diagrams, histograms, and console outputs.
+ * Contains the logic for running quantum algorithm simulations
+ * and CRUD operations for algorithm management.
+ * Uses MongoDB via Mongoose for data persistence.
+ * Uses Papermill to execute Qiskit Jupyter notebooks.
  */
 
-const algorithms = require("../data/algorithms");
+const Algorithm = require("../models/Algorithm");
 const { exec } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 const { extractNotebookOutputs } = require("./sandboxController");
 
-const PYTHON_PATH = "c:\\users\\pc\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe";
+const PYTHON_PATH = process.env.PYTHON_PATH || "python3";
 
 /**
  * GET /api/algorithms
- * Returns all available algorithms.
+ * Returns all available algorithms from MongoDB.
  */
-function getAlgorithms(req, res) {
-  res.json(algorithms);
+async function getAlgorithms(req, res) {
+  try {
+    const algorithms = await Algorithm.find().sort({ category: 1, name: 1 });
+    res.json(algorithms);
+  } catch (error) {
+    console.error("Error fetching algorithms:", error);
+    res.status(500).json({ error: "Failed to fetch algorithms." });
+  }
 }
 
 /**
  * GET /api/algorithms/:id
- * Returns a single algorithm by ID.
+ * Returns a single algorithm by its slug ID.
  */
-function getAlgorithmById(req, res) {
-  const algo = algorithms.find((a) => a.id === req.params.id);
-  if (!algo) {
-    return res.status(404).json({ error: "Algorithm not found" });
+async function getAlgorithmById(req, res) {
+  try {
+    const algo = await Algorithm.findOne({ id: req.params.id });
+    if (!algo) {
+      return res.status(404).json({ error: "Algorithm not found" });
+    }
+    res.json(algo);
+  } catch (error) {
+    console.error("Error fetching algorithm:", error);
+    res.status(500).json({ error: "Failed to fetch algorithm." });
   }
-  res.json(algo);
+}
+
+/**
+ * POST /api/algorithms
+ * Creates a new algorithm (admin only).
+ */
+async function createAlgorithm(req, res) {
+  try {
+    const algoData = req.body;
+
+    if (!algoData.id || !algoData.name || !algoData.category) {
+      return res.status(400).json({ error: "id, name, and category are required." });
+    }
+
+    // Check if ID already exists
+    const existing = await Algorithm.findOne({ id: algoData.id });
+    if (existing) {
+      return res.status(409).json({ error: `Algorithm with id '${algoData.id}' already exists.` });
+    }
+
+    const algorithm = new Algorithm(algoData);
+    await algorithm.save();
+    res.status(201).json(algorithm);
+  } catch (error) {
+    console.error("Error creating algorithm:", error);
+    res.status(500).json({ error: "Failed to create algorithm." });
+  }
+}
+
+/**
+ * PUT /api/algorithms/:id
+ * Updates an existing algorithm (admin only).
+ */
+async function updateAlgorithm(req, res) {
+  try {
+    const algorithm = await Algorithm.findOneAndUpdate(
+      { id: req.params.id },
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!algorithm) {
+      return res.status(404).json({ error: "Algorithm not found." });
+    }
+
+    res.json(algorithm);
+  } catch (error) {
+    console.error("Error updating algorithm:", error);
+    res.status(500).json({ error: "Failed to update algorithm." });
+  }
+}
+
+/**
+ * DELETE /api/algorithms/:id
+ * Deletes an algorithm (admin only).
+ */
+async function deleteAlgorithm(req, res) {
+  try {
+    const algorithm = await Algorithm.findOneAndDelete({ id: req.params.id });
+    if (!algorithm) {
+      return res.status(404).json({ error: "Algorithm not found." });
+    }
+    res.json({ message: `Algorithm '${algorithm.name}' deleted successfully.` });
+  } catch (error) {
+    console.error("Error deleting algorithm:", error);
+    res.status(500).json({ error: "Failed to delete algorithm." });
+  }
 }
 
 /**
  * POST /api/run
  * Runs a quantum algorithm simulation.
- *
- * Request body: { algorithmId: string, parameters: object }
- * Response:     { graph, circuit, blochSphere, console, measurements }
  */
-function runAlgorithm(req, res) {
+async function runAlgorithm(req, res) {
   const { algorithmId, parameters } = req.body;
 
   if (!algorithmId) {
     return res.status(400).json({ error: "algorithmId is required" });
   }
 
-  const algo = algorithms.find((a) => a.id === algorithmId);
+  const algo = await Algorithm.findOne({ id: algorithmId });
   if (!algo) {
     return res.status(404).json({ error: `Algorithm '${algorithmId}' not found` });
   }
@@ -96,7 +172,6 @@ function runAlgorithm(req, res) {
   exec(command, { timeout: 120000 }, (error, stdout, stderr) => {
     if (error) {
       console.error("Papermill execution error:", error.message);
-      // Try to read output even if it failed, as Papermill fails on cell errors
       if (!fs.existsSync(outputNb)) {
           return res.status(500).json({ error: "Execution failed completely", console: stderr || error.message });
       }
@@ -110,10 +185,10 @@ function runAlgorithm(req, res) {
       let allText = "";
       let allErrors = "";
 
-      for (const res of resultsArray) {
-        if (res.images && res.images.length > 0) allImages.push(...res.images);
-        if (res.text) allText += res.text + "\n";
-        if (res.errorText) allErrors += res.errorText + "\n";
+      for (const r of resultsArray) {
+        if (r.images && r.images.length > 0) allImages.push(...r.images);
+        if (r.text) allText += r.text + "\n";
+        if (r.errorText) allErrors += r.errorText + "\n";
       }
 
       let circuitImg = null;
@@ -136,16 +211,14 @@ function runAlgorithm(req, res) {
       const phiMatch = consoleOut.match(/BLOCH_PHI=([\d.]+)/);
       if (phiMatch) phi = parseFloat(phiMatch[1]);
 
-      // Remove the BLOCH_ variables from the console output to hide them from the user
+      // Remove the BLOCH_ variables from the console output
       consoleOut = consoleOut.replace(/BLOCH_THETA=[\d.]+\n?/g, "");
       consoleOut = consoleOut.replace(/BLOCH_PHI=[\d.]+\n?/g, "");
 
       // Parse Measurements Dictionary
-      // Looking for: {'010': 120, '101': 880}
       const countsMatch = consoleOut.match(/\{('[01]+': \d+(?:,\s*)?)+\}/);
       if (countsMatch) {
           try {
-              // Convert python dict string to JSON: {'010': 120} -> {"010": 120}
               const jsonStr = countsMatch[0].replace(/'/g, '"');
               const countsObj = JSON.parse(jsonStr);
               
@@ -161,14 +234,12 @@ function runAlgorithm(req, res) {
                       count: count
                   });
               }
-              // Sort by highest probability
               measurements.sort((a, b) => b.probability - a.probability);
           } catch (e) {
               console.error("Failed to parse measurements:", e);
           }
       }
 
-      // Add a nice header to the console
       consoleOut = `═══ ${algo.name} ═══\nExecuted successfully via Qiskit Aer Simulator.\n\n${consoleOut}`;
 
       if (allErrors.trim()) {
@@ -192,4 +263,4 @@ function runAlgorithm(req, res) {
   });
 }
 
-module.exports = { getAlgorithms, getAlgorithmById, runAlgorithm };
+module.exports = { getAlgorithms, getAlgorithmById, createAlgorithm, updateAlgorithm, deleteAlgorithm, runAlgorithm };

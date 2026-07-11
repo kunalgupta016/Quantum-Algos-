@@ -35,7 +35,7 @@ export default function BlochImageViewer({ blochImage }) {
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-sm p-6">
           <div className="bg-[var(--color-app-base)] border border-[var(--color-app-border)] rounded-xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden">
             
             {/* Modal Header */}
@@ -55,7 +55,7 @@ export default function BlochImageViewer({ blochImage }) {
             <div className="flex flex-1 overflow-hidden flex-col lg:flex-row">
               
               {/* Left Side: Parameters */}
-              <div className="w-full lg:w-1/3 border-r border-[var(--color-app-border)] p-6 overflow-y-auto bg-[var(--color-app-surface)]">
+              <div className="w-full lg:w-1/3 border-r border-[var(--color-app-border)] p-6 overflow-y-auto bg-[var(--color-app-surface)]" data-lenis-prevent="true">
                 <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-app-accent)]">
                   Algorithm Parameters
                 </h3>

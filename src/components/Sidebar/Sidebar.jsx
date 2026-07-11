@@ -1,86 +1,120 @@
-import { useNavigate, useParams } from "react-router-dom";
-import AlgorithmCard from "../AlgorithmCard/AlgorithmCard";
-import { useAlgorithmContext } from "../../context/AlgorithmContext";
-import { CATEGORIES } from "../../data/algorithms";
+import { NavLink } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { SIDEBAR_LINKS } from "../../utils/constants";
+
+const icons = {
+  dashboard: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
+    </svg>
+  ),
+  bloch: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+      <line x1="2" y1="12" x2="22" y2="12" />
+    </svg>
+  ),
+  circuit: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 9h6m8 0h6M2 15h6m8 0h6" /><rect x="8" y="6" width="8" height="6" rx="1" />
+      <rect x="8" y="12" width="8" height="6" rx="1" />
+    </svg>
+  ),
+  sandbox: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /><line x1="12" y1="2" x2="12" y2="22" opacity="0.3" />
+    </svg>
+  ),
+};
+
+import { useAuth } from "../../context/AuthContext";
 
 export default function Sidebar({ isOpen, onToggle }) {
-  const { algorithmList } = useAlgorithmContext();
-  const navigate = useNavigate();
-  const { id } = useParams();
-
-  // Group algorithms by category
-  const grouped = algorithmList.reduce((acc, algo) => {
-    const cat = algo.category || "Other";
-    if (!acc[cat]) acc[cat] = [];
-    acc[cat].push(algo);
-    return acc;
-  }, {});
-
-  const categoryOrder = Object.values(CATEGORIES);
-  const sortedCategories = Object.keys(grouped).sort(
-    (a, b) => categoryOrder.indexOf(a) - categoryOrder.indexOf(b)
-  );
-
-  const handleSelect = (algorithmId) => {
-    navigate(`/algorithm/${algorithmId}`);
-  };
-
-  if (!isOpen) {
-    return (
-      <aside className="w-14 border-r border-[var(--color-app-border)] bg-[var(--color-app-surface)] flex flex-col h-full items-center py-4 shrink-0">
-        <button 
-          onClick={onToggle} 
-          className="text-[var(--color-app-text-muted)] hover:text-white p-2 rounded-lg hover:bg-[var(--color-app-surface-hover)] bg-[var(--color-app-base)] border border-[var(--color-app-border)]"
-          title="Open Sidebar"
-        >
-           <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-             <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-           </svg>
-        </button>
-      </aside>
-    );
-  }
+  const { isAdmin } = useAuth();
 
   return (
-    <aside className="w-64 border-r border-[var(--color-app-border)] bg-[var(--color-app-surface)] flex flex-col h-full shrink-0">
-      <div className="border-b border-[var(--color-app-border)] px-4 py-3 flex items-center justify-between">
-        <div>
-          <h2 className="text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-app-accent)]">
-            Quantum Algorithms
-          </h2>
-          <p className="mt-0.5 text-xs text-[var(--color-app-text-muted)]">
-            {algorithmList.length} algorithms available
-          </p>
-        </div>
-        <button 
-          onClick={onToggle} 
-          className="text-[var(--color-app-text-muted)] hover:text-white p-1.5 rounded-lg hover:bg-[var(--color-app-surface-hover)]"
-          title="Collapse Sidebar"
+    <AnimatePresence mode="wait">
+      {isOpen ? (
+        <motion.aside
+          key="open"
+          initial={{ width: 0, opacity: 0 }}
+          animate={{ width: 240, opacity: 1 }}
+          exit={{ width: 0, opacity: 0 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="sidebar-container"
         >
-          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-      </div>
-      <div className="flex-1 overflow-y-auto p-2 space-y-4">
-        {sortedCategories.map((category) => (
-          <div key={category} className="space-y-1">
-            <h3 className="px-2 pt-1 text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-app-text-muted)]">
-              {category}
-            </h3>
-            <div className="space-y-0.5">
-              {grouped[category].map((algo) => (
-                <AlgorithmCard
-                  key={algo.id}
-                  algorithm={algo}
-                  isActive={id === algo.id}
-                  onClick={() => handleSelect(algo.id)}
-                />
-              ))}
-            </div>
+          <div className="sidebar-header">
+            <span className="sidebar-title">Navigation</span>
+            <button onClick={onToggle} className="sidebar-toggle" title="Collapse Sidebar">
+              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
           </div>
-        ))}
-      </div>
-    </aside>
+
+          <nav className="sidebar-nav" data-lenis-prevent="true">
+            {SIDEBAR_LINKS.map((link) => (
+              <NavLink
+                key={link.path}
+                to={link.path}
+                className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`}
+              >
+                <span className="sidebar-link-icon">
+                  {icons[link.icon]}
+                </span>
+                <span className="sidebar-link-text">{link.label}</span>
+              </NavLink>
+            ))}
+
+            {isAdmin && (
+              <NavLink
+                to="/admin"
+                className={({ isActive }) => `sidebar-link mt-4 !border-[var(--color-app-error)] !bg-[rgba(239,68,68,0.05)] ${isActive ? "active" : ""}`}
+              >
+                <span className="sidebar-link-icon text-[var(--color-app-error)]">
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </span>
+                <span className="sidebar-link-text text-[var(--color-app-error)] font-bold">Admin Panel</span>
+              </NavLink>
+            )}
+          </nav>
+        </motion.aside>
+      ) : (
+        <motion.aside
+          key="collapsed"
+          initial={{ width: 0, opacity: 0 }}
+          animate={{ width: 60, opacity: 1 }}
+          exit={{ width: 0, opacity: 0 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="sidebar-container sidebar-collapsed"
+          style={{ alignItems: "center", paddingTop: "1rem" }}
+        >
+          <button onClick={onToggle} className="sidebar-toggle" title="Open Sidebar">
+            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+
+          <nav className="sidebar-nav" style={{ alignItems: "center" }}>
+            {SIDEBAR_LINKS.map((link) => (
+              <NavLink
+                key={link.path}
+                to={link.path}
+                className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`}
+                title={link.label}
+                style={{ justifyContent: "center", padding: "0.65rem" }}
+              >
+                <span className="sidebar-link-icon">
+                  {icons[link.icon]}
+                </span>
+              </NavLink>
+            ))}
+          </nav>
+        </motion.aside>
+      )}
+    </AnimatePresence>
   );
 }

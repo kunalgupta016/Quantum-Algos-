@@ -10,7 +10,7 @@ const { exec } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
-const PYTHON_PATH = "c:\\users\\pc\\appdata\\local\\python\\pythoncore-3.14-64\\python.exe";
+const PYTHON_PATH = process.env.PYTHON_PATH || "python3";
 
 function runSandboxCode(req, res) {
   const { code, cells } = req.body;

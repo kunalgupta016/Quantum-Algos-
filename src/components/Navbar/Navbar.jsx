@@ -1,62 +1,198 @@
-import { Link, useLocation } from "react-router-dom";
-import { APP_NAME, APP_ORG_SHORT, NAV_LINKS } from "../../utils/constants";
+import { useState, useRef, useEffect } from "react";
+import { NavLink, Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { APP_NAME, APP_ORG, PUBLIC_NAV_LINKS, ALGORITHM_SERIES_ORDER } from "../../utils/constants";
+import { useAuth } from "../../context/AuthContext";
+import { useAlgorithmContext } from "../../context/AlgorithmContext";
+import ThemeToggle from "../ThemeToggle/ThemeToggle";
 
+/**
+ * Universal Navbar — works for both public and authenticated states.
+ * Public: Logo | Blogs | News | Docs | Algorithms dropdown | Theme | Register | Login
+ * Auth:   Logo | Blogs | News | Docs | Algorithms dropdown | Theme | Username | Logout
+ */
 export default function Navbar() {
-  const location = useLocation();
+  const { user, isLoggedIn, isAdmin, logout } = useAuth();
+  const { algorithmList } = useAlgorithmContext();
+  const navigate = useNavigate();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Sort algorithms by series order
+  const sortedAlgorithms = [...algorithmList].sort((a, b) => {
+    const idxA = ALGORITHM_SERIES_ORDER.indexOf(a.id);
+    const idxB = ALGORITHM_SERIES_ORDER.indexOf(b.id);
+    const posA = idxA === -1 ? 999 : idxA;
+    const posB = idxB === -1 ? 999 : idxB;
+    return posA - posB;
+  });
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
-    <nav className="bg-[var(--color-app-surface)] border-b border-[var(--color-app-border)] px-6 py-3">
-      <div className="mx-auto flex max-w-screen-2xl items-center justify-between">
-        {/* Brand */}
-        <Link to="/" className="flex items-center gap-3 group">
-          {/* QL Shield Icon */}
-          <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--color-app-accent)] to-[var(--color-app-accent-hover)] shadow-lg shadow-[rgba(199,169,78,0.15)]">
-            <svg className="h-5 w-5 text-[var(--color-app-base)]" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-3.13 9.03-7 10.2-3.87-1.17-7-5.53-7-10.2V6.3l7-3.12z"/>
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold tracking-wide text-[var(--color-app-text-main)] group-hover:text-[var(--color-app-primary)] transition-colors">
-              {APP_NAME}
-            </span>
-            <span className="text-xs font-medium uppercase tracking-[0.15em] text-[var(--color-app-accent-hover)]">
-              {APP_ORG_SHORT}
-            </span>
+    <nav className="nav-container">
+      <div className="nav-inner">
+        {/* Left: Brand */}
+        <Link to="/" className="nav-brand">
+          <img src="/logo.png" alt="Logo" className="nav-logo" />
+          <div>
+            <div className="nav-brand-name">{APP_NAME}</div>
+            <div className="nav-brand-org">{APP_ORG}</div>
           </div>
         </Link>
 
-        {/* Navigation */}
-        <div className="flex items-center gap-1">
-          {NAV_LINKS.map((link) => {
-            const isActive = location.pathname === link.path;
-            return (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`relative px-4 py-2 text-xs font-medium rounded-lg transition-all duration-200 ${
-                  isActive
-                    ? "text-[var(--color-app-primary)] bg-[var(--color-app-primary-glow)]"
-                    : "text-[var(--color-app-text-muted)] hover:text-[var(--color-app-text-main)] hover:bg-[rgba(255,255,255,0.04)]"
-                }`}
-              >
-                {link.label}
-                {isActive && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full bg-[var(--color-app-primary)]" />
-                )}
-              </Link>
-            );
-          })}
+        {/* Center: Navigation Links */}
+        <div className={`nav-links ${mobileOpen ? "mobile-open" : ""}`}>
+          {PUBLIC_NAV_LINKS.map((link) => (
+            <NavLink
+              key={link.path}
+              to={link.path}
+              className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+              onClick={() => setMobileOpen(false)}
+            >
+              {link.label}
+            </NavLink>
+          ))}
 
-          {/* Status indicator */}
-          <div className="ml-4 flex items-center gap-2 rounded-lg border border-[var(--color-app-border)] bg-[var(--color-app-base)] px-3 py-1.5">
-            <div className="app-pulse-dot" />
-            <span className="text-xs font-medium text-[var(--color-app-text-muted)]">
-              System Active
-            </span>
+          {isLoggedIn && (
+            <NavLink
+              to={isAdmin ? "/admin" : "/dashboard"}
+              className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+              onClick={() => setMobileOpen(false)}
+            >
+              Dashboard
+            </NavLink>
+          )}
+
+          {/* Algorithms Dropdown */}
+          <div className="nav-dropdown" ref={dropdownRef}>
+            <button
+              className="nav-dropdown-trigger"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+            >
+              Algorithms
+              <motion.svg
+                animate={{ rotate: dropdownOpen ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+                width="14" height="14" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2.5"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </motion.svg>
+            </button>
+
+            <AnimatePresence>
+              {dropdownOpen && (
+                <motion.div
+                  className="nav-dropdown-menu"
+                  data-lenis-prevent="true"
+                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                >
+                  {sortedAlgorithms.map((algo, idx) => (
+                    <button
+                      key={algo.id}
+                      className="nav-dropdown-item"
+                      onClick={() => {
+                        navigate(`/algorithm/${algo.id}`);
+                        setDropdownOpen(false);
+                        setMobileOpen(false);
+                      }}
+                    >
+                      <span className="nav-dropdown-num">{idx + 1}</span>
+                      <div style={{ overflow: "hidden" }}>
+                        <div className="nav-dropdown-name">{algo.name}</div>
+                        <div className="nav-dropdown-desc">{algo.shortDescription}</div>
+                      </div>
+                    </button>
+                  ))}
+
+                  {sortedAlgorithms.length === 0 && (
+                    <div style={{ padding: "1rem", textAlign: "center", fontSize: "0.8rem", color: "var(--color-app-text-muted)" }}>
+                      No algorithms available
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
+
+        {/* Right: Actions */}
+        <div className="nav-actions">
+          <ThemeToggle />
+
+          {isLoggedIn ? (
+            <>
+              <div className="nav-user-info">
+                <span className="nav-username">{user?.username}</span>
+                <span className={`nav-role ${isAdmin ? "nav-role-admin" : "nav-role-user"}`}>
+                  {isAdmin ? "Admin" : "User"}
+                </span>
+              </div>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleLogout}
+                className="nav-btn-logout"
+              >
+                Logout
+              </motion.button>
+            </>
+          ) : (
+            <>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate("/login")}
+                className="nav-btn-outline"
+              >
+                Register
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate("/login")}
+                className="nav-btn-primary"
+              >
+                Login
+              </motion.button>
+            </>
+          )}
+
+          {/* Mobile Hamburger */}
+          <button
+            className="nav-mobile-toggle"
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
+            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              {mobileOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
+        </div>
       </div>
+      <div className="app-gradient-line" />
     </nav>
   );
 }

@@ -12,6 +12,15 @@ dist
 dist-ssr
 *.local
 
+# Environment variables (NEVER commit secrets)
+.env
+.env.*
+!.env.example
+backend/.env
+
+# Uploaded files
+backend/uploads/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

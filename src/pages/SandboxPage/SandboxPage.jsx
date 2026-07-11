@@ -422,7 +422,7 @@ export default function SandboxPage() {
   }, []);
 
   return (
-    <div className="flex-1 overflow-y-auto bg-[var(--color-app-base)]">
+    <div className="flex-1 overflow-y-auto bg-[var(--color-app-base)]" data-lenis-prevent="true">
       <Loading visible={globalLoading} message="Executing all cells..." />
 
       <div className="mx-auto max-w-5xl px-6 py-8">

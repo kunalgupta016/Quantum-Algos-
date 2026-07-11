@@ -7,12 +7,11 @@ export default function MainLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   return (
-    <div className="flex h-screen flex-col bg-[var(--color-app-base)] text-[var(--color-app-text-main)]">
+    <div className="flex min-h-screen flex-col" style={{ background: "var(--color-app-base)", color: "var(--color-app-text-main)" }}>
       <Navbar />
-      <div className="app-gradient-line" />
-      <div className="flex flex-1 overflow-hidden relative">
+      <div className="flex flex-1 relative">
         <Sidebar isOpen={isSidebarOpen} onToggle={() => setIsSidebarOpen(!isSidebarOpen)} />
-        <main className="flex flex-1 flex-col overflow-hidden">
+        <main className="flex flex-1 flex-col overflow-y-auto" data-lenis-prevent="true">
           <Outlet />
         </main>
       </div>

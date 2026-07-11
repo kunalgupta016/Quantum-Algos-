@@ -1,26 +1,39 @@
-import { createContext, useContext, useState, useCallback } from "react";
-import algorithms from "../data/algorithms";
+import { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { getAlgorithms as fetchAlgorithmsAPI } from "../services/api";
 
 const AlgorithmContext = createContext(null);
 
 /**
  * Provides global algorithm state to the component tree.
- *
- * Stores:
- * - algorithmList: all algorithms from data store
- * - selectedAlgorithm: currently selected algorithm object
- * - parameters: user-entered input values
- * - result: API response (graph, circuit, bloch, console, measurements)
- * - loading: whether an API call is in progress
- * - error: any error message
+ * Now fetches algorithms from MongoDB via the backend API.
  */
 export function AlgorithmProvider({ children }) {
-  const algorithmList = algorithms;
+  const [algorithmList, setAlgorithmList] = useState([]);
   const [selectedAlgorithm, setSelectedAlgorithm] = useState(null);
   const [parameters, setParameters] = useState({});
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [initialLoading, setInitialLoading] = useState(true);
+
+  // Fetch algorithms from backend API
+  const refreshAlgorithms = useCallback(async () => {
+    try {
+      const data = await fetchAlgorithmsAPI();
+      setAlgorithmList(data);
+    } catch (err) {
+      console.error("Failed to fetch algorithms:", err);
+      setAlgorithmList([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    async function load() {
+      await refreshAlgorithms();
+      setInitialLoading(false);
+    }
+    load();
+  }, [refreshAlgorithms]);
 
   const selectAlgorithm = useCallback((algorithmId) => {
     const algo = algorithmList.find((a) => a.id === algorithmId);
@@ -59,6 +72,8 @@ export function AlgorithmProvider({ children }) {
     setLoading,
     error,
     setError,
+    initialLoading,
+    refreshAlgorithms,
   };
 
   return (
@@ -68,10 +83,6 @@ export function AlgorithmProvider({ children }) {
   );
 }
 
-/**
- * Custom hook for consuming algorithm context.
- * Throws if used outside of AlgorithmProvider.
- */
 export function useAlgorithmContext() {
   const context = useContext(AlgorithmContext);
   if (!context) {

@@ -166,7 +166,7 @@ export default function BlochSphereFullScreenPage() {
         </div>
 
         {/* Right Side: Controls */}
-        <div className="w-full lg:w-96 bg-[var(--color-app-surface)] p-6 overflow-y-auto flex flex-col gap-8 border-l border-[var(--color-app-border)]">
+        <div className="w-full lg:w-96 bg-[var(--color-app-surface)] p-6 overflow-y-auto flex flex-col gap-8 border-l border-[var(--color-app-border)]" data-lenis-prevent="true">
           
           {/* State readout */}
           <div className="rounded-lg app-glass p-5">

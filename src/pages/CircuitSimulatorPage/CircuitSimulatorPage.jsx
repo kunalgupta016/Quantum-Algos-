@@ -230,12 +230,8 @@ plt.close(fig2)
     // We would ideally send this code to the /api/sandbox/run endpoint to execute it
     
     try {
-      const res = await fetch("http://localhost:8000/api/sandbox/run", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: pyCode })
-      });
-      const data = await res.json();
+      const { runSandboxCode } = await import("../../services/api");
+      const data = await runSandboxCode({ code: pyCode });
       setSimResult(data);
     } catch (err) {
       console.error(err);
@@ -278,7 +274,7 @@ plt.close(fig2)
         <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
           
           {/* Left Sidebar: Gate Palette */}
-          <div className="w-64 bg-[var(--color-app-surface)] border-r border-[var(--color-app-border)] p-6 overflow-y-auto">
+          <div className="w-64 bg-[var(--color-app-surface)] border-r border-[var(--color-app-border)] p-6 overflow-y-auto" data-lenis-prevent="true">
             <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-app-accent)] mb-6 border-b border-[var(--color-app-border)] pb-2">
               Gate Palette
             </h3>
@@ -293,7 +289,7 @@ plt.close(fig2)
           </div>
 
           {/* Main Area: Circuit Wire Grid */}
-          <div className="flex-1 p-8 overflow-y-auto bg-[var(--color-app-base)] flex flex-col">
+          <div className="flex-1 p-8 overflow-y-auto bg-[var(--color-app-base)] flex flex-col" data-lenis-prevent="true">
             
             {/* Qubit Controls */}
             <div className="flex justify-end gap-2 mb-6 items-center">

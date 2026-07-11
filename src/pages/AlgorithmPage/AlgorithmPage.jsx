@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useAlgorithmContext } from "../../context/AlgorithmContext";
 import { useAlgorithm } from "../../hooks/useAlgorithm";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import FormulaCard from "../../components/FormulaCard/FormulaCard";
 import ParameterInput from "../../components/ParameterInput/ParameterInput";
 import Button from "../../components/Button/Button";
@@ -25,36 +27,49 @@ export default function AlgorithmPage() {
     error,
   } = useAlgorithmContext();
   const { execute, isRunning } = useAlgorithm();
+  const { isAdmin } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (id) selectAlgorithm(id);
   }, [id, selectAlgorithm]);
 
-  if (!selectedAlgorithm) {
+  // Wait until the selectedAlgorithm in context matches the route ID
+  if (!selectedAlgorithm || selectedAlgorithm.id !== id) {
     return (
       <div className="flex flex-1 items-center justify-center p-8">
-        <p className="text-[var(--color-app-text-muted)]">Algorithm not found.</p>
+        <Loading visible={true} />
       </div>
     );
   }
 
   return (
-    <div className="flex-1 overflow-y-auto bg-[var(--color-app-base)]">
+    <div className="flex-1 overflow-y-auto bg-[var(--color-app-base)]" data-lenis-prevent="true">
       <Loading visible={loading} />
 
       <div className="mx-auto max-w-4xl px-6 py-8">
         {/* Header */}
-        <header className="mb-6">
-          <div className="mb-2 inline-flex items-center rounded-full border border-[var(--color-app-accent)]/30 bg-[var(--color-app-accent)]/10 px-3 py-0.5 text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-app-accent)]">
-            {selectedAlgorithm.category}
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="mb-2 inline-flex items-center rounded-full border border-[var(--color-app-accent)]/30 bg-[var(--color-app-accent)]/10 px-3 py-0.5 text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-app-accent)]">
+                {selectedAlgorithm.category}
+              </div>
+              <h1 className="text-3xl font-extrabold text-[var(--color-app-text-main)]">
+                {selectedAlgorithm.name}
+              </h1>
+            </div>
+            {isAdmin && (
+              <button
+                onClick={() => navigate(`/admin/edit-algorithm/${selectedAlgorithm.id}`)}
+                className="rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 px-4 py-2 text-xs font-bold hover:bg-blue-500/30 transition-colors"
+              >
+                ✏️ Edit Algorithm Data
+              </button>
+            )}
           </div>
-          <h1 className="text-xs font-extrabold text-[var(--color-app-text-main)]">
-            {selectedAlgorithm.name}
-          </h1>
           <p className="mt-2 text-xs leading-relaxed text-[var(--color-app-text-light)] max-w-3xl">
             {selectedAlgorithm.description}
           </p>
-        </header>
 
         {/* Educational Content Tabs */}
         <section className="mb-10">
