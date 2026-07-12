@@ -266,17 +266,27 @@ export default function SandboxPage() {
   const fileInputRef = useRef(null);
 
   const [packages, setPackages] = useState("");
-  const [installStatus, setInstallStatus] = useState(null); // { status: "loading" | "success" | "error", message: "" }
+  const [installStatus, setInstallStatus] = useState(null); // { status: "loading" | "success" | "error", message: "", logs: "" }
+  const [showLogs, setShowLogs] = useState(false);
 
   const handleInstallPackages = async () => {
     if (!packages.trim()) return;
-    setInstallStatus({ status: "loading", message: "Installing..." });
+    setInstallStatus({ status: "loading", message: "Installing...", logs: "" });
+    setShowLogs(true);
     try {
       const res = await installSandboxPackages(packages);
-      setInstallStatus({ status: "success", message: res.message || "Packages installed!" });
-      setTimeout(() => setInstallStatus(null), 5000);
+      setInstallStatus({ status: "success", message: res.message || "Packages installed!", logs: res.logs || "" });
+      
+      // Browser alert as requested by Sir
+      window.alert("Packages installed successfully!");
+      
+      setTimeout(() => setInstallStatus(null), 8000); // Give them time to read success
     } catch (err) {
-      setInstallStatus({ status: "error", message: err.response?.data?.error || "Installation failed" });
+      setInstallStatus({ 
+        status: "error", 
+        message: err.response?.data?.error || "Installation failed",
+        logs: err.response?.data?.logs || "" 
+      });
     }
   };
 
@@ -508,10 +518,23 @@ export default function SandboxPage() {
                   Error
                 </span>
               )}
+              {installStatus?.logs && (
+                <button 
+                  onClick={() => setShowLogs(!showLogs)}
+                  className="text-[10px] underline text-[var(--color-app-text-muted)] hover:text-[var(--color-app-primary)] transition"
+                >
+                  {showLogs ? "Hide Logs" : "Show Logs"}
+                </button>
+              )}
             </div>
             <p className="mt-2 text-[10px] text-[var(--color-app-text-muted)]">
               <span className="font-semibold">Pre-installed:</span> qiskit, qiskit-aer, numpy, scipy, pandas, matplotlib, scikit-learn, sympy, networkx
             </p>
+            {showLogs && installStatus?.logs && (
+              <div className="mt-2 bg-[#0d1117] border border-[var(--color-app-border-light)] p-2 rounded text-[10px] font-mono text-[var(--color-app-text-main)] max-h-32 overflow-y-auto whitespace-pre-wrap">
+                {installStatus.logs}
+              </div>
+            )}
           </div>
 
           {/* Toolbar */}

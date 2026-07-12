@@ -194,23 +194,31 @@ function installPackages(req, res) {
   }
 
   // Sanitize the input to prevent command injection
-  const safePackages = packages.replace(/[^a-zA-Z0-9_\-\. ]/g, "").trim();
+  // Allowed characters: letters, numbers, _, -, ., =, <, >, space
+  const safePackages = packages.replace(/[^a-zA-Z0-9_\-\.\=\<\> ]/g, "").trim();
   if (!safePackages) {
     return res.status(400).json({ error: "Invalid packages format" });
   }
 
   console.log("Sandbox: Installing packages:", safePackages);
 
-  // We use standard pip install. Timeout is generous (120s) because network/compilation might take time.
-  const command = `"${PYTHON_PATH}" -m pip install -q ${safePackages}`;
+  // We use standard pip install. Removed -q to get installation logs
+  const command = `"${PYTHON_PATH}" -m pip install ${safePackages}`;
 
   exec(command, { timeout: 120000 }, (error, stdout, stderr) => {
     if (error) {
       console.error("Sandbox package installation error:", error.message, stderr);
-      return res.status(500).json({ error: "Failed to install packages. " + (stderr || error.message) });
+      return res.status(500).json({ 
+        error: "Failed to install packages.", 
+        logs: stderr || stdout || error.message 
+      });
     }
     
-    return res.json({ success: true, message: "Packages installed successfully." });
+    return res.json({ 
+      success: true, 
+      message: "Packages installed successfully.",
+      logs: stdout || "Installation complete."
+    });
   });
 }
 
