@@ -7,7 +7,7 @@
   background: var(--color-app-base);
   color: var(--color-app-text-main);
   font-family: var(--font-sans);
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* ─── HERO ──────────────────────────────────────── */
@@ -24,10 +24,7 @@
 .landing-hero-bg {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse at 20% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, rgba(56, 189, 248, 0.04) 0%, transparent 50%);
+  background: var(--color-app-base);
   pointer-events: none;
 }
 
@@ -36,22 +33,17 @@
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 60px 60px;
-}
-
-[data-theme="light"] .landing-hero-bg {
-  background:
-    radial-gradient(ellipse at 20% 50%, rgba(37, 99, 235, 0.06) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(124, 58, 237, 0.04) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, rgba(14, 165, 233, 0.03) 0%, transparent 50%);
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(circle at center, black, transparent 80%);
+  -webkit-mask-image: radial-gradient(circle at center, black, transparent 80%);
 }
 
 [data-theme="light"] .landing-hero-bg::before {
   background-image:
-    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
 }
 
 /* ─── HERO CONTENT ─────────────────────────────── */
@@ -81,14 +73,15 @@
   gap: 0.5rem;
   padding: 0.4rem 1rem;
   border-radius: 999px;
-  border: 1px solid var(--color-app-primary-glow);
-  background: var(--color-app-primary-glow);
-  color: var(--color-app-primary);
-  font-size: 0.7rem;
+  border: 1px solid var(--color-app-border);
+  background: var(--color-app-surface);
+  color: var(--color-app-text-main);
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.05em;
   margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .landing-badge-dot {
@@ -96,13 +89,6 @@
   height: 6px;
   border-radius: 50%;
   background: var(--color-app-primary);
-  box-shadow: 0 0 8px var(--color-app-primary);
-  animation: pulse-dot 2s infinite;
-}
-
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
 }
 
 .landing-title {
@@ -114,10 +100,7 @@
 }
 
 .landing-title-gradient {
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--color-app-text-main);
 }
 
 .landing-description {
@@ -135,18 +118,20 @@
 
 .landing-btn-primary {
   padding: 0.85rem 2.5rem;
-  border-radius: 0.75rem;
-  background: linear-gradient(135deg, var(--color-app-primary), var(--color-app-primary-hover));
+  border-radius: 0.5rem;
+  background: var(--color-app-primary);
   color: white;
   font-size: 0.9rem;
   font-weight: 700;
   border: none;
   cursor: pointer;
-  box-shadow: 0 0 25px var(--color-app-primary-glow);
-  transition: all 0.3s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.2s;
 }
 .landing-btn-primary:hover {
-  box-shadow: 0 0 40px var(--color-app-primary-glow);
+  background: var(--color-app-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.15);
 }
 
 .landing-btn-secondary {
@@ -192,10 +177,7 @@
 .landing-stat-value {
   font-size: 3rem;
   font-weight: 800;
-  background: linear-gradient(135deg, var(--color-app-text-main), var(--color-app-primary));
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--color-app-primary);
 }
 
 .landing-stat-label {
@@ -242,15 +224,16 @@
 
 .landing-feature-card {
   padding: 2rem;
-  border-radius: 1rem;
+  border-radius: 0.75rem;
   border: 1px solid var(--color-app-card-border);
-  background: var(--color-app-card-bg);
-  transition: all 0.3s;
+  background: var(--color-app-surface);
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 .landing-feature-card:hover {
   border-color: var(--color-app-card-hover-border);
-  background: var(--color-app-card-hover-bg);
-  transform: translateY(-4px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 
 .landing-feature-icon {
@@ -303,7 +286,7 @@
 .landing-gallery-icon {
   font-size: 3rem;
   margin-bottom: 1rem;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+  color: var(--color-app-primary);
 }
 
 .landing-gallery-title {
@@ -464,9 +447,10 @@
   text-align: center;
   max-width: 700px;
   padding: 4rem 3rem;
-  border-radius: 2rem;
-  border: 1px solid var(--color-app-card-border);
-  background: linear-gradient(135deg, var(--color-app-primary-glow), rgba(139, 92, 246, 0.05));
+  border-radius: 1rem;
+  border: 1px solid var(--color-app-border);
+  background: var(--color-app-surface);
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
 }
 
 .landing-cta-title {

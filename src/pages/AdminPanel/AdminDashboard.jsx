@@ -32,6 +32,13 @@ export default function AdminDashboard() {
       icon: "📚",
       path: "/admin/docs",
       color: "from-orange-500 to-red-600",
+    },
+    {
+      title: "Quantum Challenges",
+      desc: "Manage challenges for the Quantum Circuit builder",
+      icon: "🎮",
+      path: "/admin/playground",
+      color: "from-yellow-500 to-orange-600",
     }
   ];
 

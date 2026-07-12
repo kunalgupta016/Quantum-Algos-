@@ -42,6 +42,11 @@ export const SIDEBAR_LINKS = [
     path: "/sandbox",
     icon: "sandbox",
   },
+  {
+    label: "Playground",
+    path: "/playground",
+    icon: "playground",
+  },
 ];
 
 /**

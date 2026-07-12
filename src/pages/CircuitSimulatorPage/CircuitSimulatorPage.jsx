@@ -9,16 +9,20 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import Button from "../../components/Button/Button";
 
-// Available gates
 const GATES = [
-  { type: "I", label: "I (Spacer)", color: "bg-gray-500/20 text-gray-400 border-gray-500 border-dashed" },
-  { type: "H", label: "H", color: "bg-blue-500/20 text-blue-400 border-blue-500" },
-  { type: "X", label: "X", color: "bg-red-500/20 text-red-400 border-red-500" },
-  { type: "Y", label: "Y", color: "bg-green-500/20 text-green-400 border-green-500" },
-  { type: "Z", label: "Z", color: "bg-purple-500/20 text-purple-400 border-purple-500" },
-  { type: "S", label: "S", color: "bg-yellow-500/20 text-yellow-400 border-yellow-500" },
-  { type: "T", label: "T", color: "bg-orange-500/20 text-orange-400 border-orange-500" },
-  { type: "CX", label: "CX", color: "bg-pink-500/20 text-pink-400 border-pink-500" },
+  { type: "I", label: "I (Spacer)", short: "I", color: "bg-gray-500/20 text-gray-400 border-gray-500 border-dashed" },
+  { type: "H", label: "H", short: "H", color: "bg-blue-500/20 text-blue-400 border-blue-500" },
+  { type: "X", label: "X", short: "X", color: "bg-red-500/20 text-red-400 border-red-500" },
+  { type: "Y", label: "Y", short: "Y", color: "bg-green-500/20 text-green-400 border-green-500" },
+  { type: "Z", label: "Z", short: "Z", color: "bg-purple-500/20 text-purple-400 border-purple-500" },
+  { type: "S", label: "S", short: "S", color: "bg-yellow-500/20 text-yellow-400 border-yellow-500" },
+  { type: "T", label: "T", short: "T", color: "bg-orange-500/20 text-orange-400 border-orange-500" },
+  { type: "SX", label: "√X", short: "√X", color: "bg-red-400/20 text-red-300 border-red-400" },
+  { type: "SDG", label: "S†", short: "S†", color: "bg-yellow-400/20 text-yellow-300 border-yellow-400" },
+  { type: "TDG", label: "T†", short: "T†", color: "bg-orange-400/20 text-orange-300 border-orange-400" },
+  { type: "CX", label: "CX", short: "CX", color: "bg-pink-500/20 text-pink-400 border-pink-500" },
+  { type: "SWAP", label: "SWAP", short: "SWAP", color: "bg-cyan-500/20 text-cyan-400 border-cyan-500" },
+  { type: "M", label: "Measure", short: "M", color: "bg-zinc-700/50 text-white border-zinc-500" },
 ];
 
 function DraggableGate({ gate }) {
@@ -77,8 +81,8 @@ function WireDroppable({ wireIndex, gates, onRemove, onUpdate, numQubits }) {
                 className="absolute top-0 right-0 -mt-2 -mr-2 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover/gate:opacity-100 cursor-pointer z-20"
                 onClick={(e) => { e.stopPropagation(); onRemove(wireIndex, i); }}
               >✕</div>
-              <span className="font-bold text-sm">{g.type === "I" ? "I" : g.label}</span>
-              {g.type === "CX" && (
+              <span className="font-bold text-sm">{g.short || g.label}</span>
+              {(g.type === "CX" || g.type === "SWAP") && (
                 <select 
                   className="text-[10px] bg-black/40 mt-0.5 border border-pink-500/50 rounded px-1 outline-none text-pink-400 font-mono cursor-pointer"
                   value={g.target !== undefined ? g.target : ((wireIndex + 1) % numQubits)}
@@ -182,25 +186,41 @@ export default function CircuitSimulatorPage() {
     setLoading(true);
     setSimResult(null);
 
+    // Check if user has explicit 'M' gates
+    let hasMeasureGate = false;
+    for (let q = 0; q < numQubits; q++) {
+      if (circuit[q] && circuit[q].some(g => g.type === "M")) {
+        hasMeasureGate = true;
+        break;
+      }
+    }
+
     // Generate Qiskit Python Code
     let pyCode = `from qiskit import QuantumCircuit, transpile\n`;
     pyCode += `from qiskit_aer import Aer\n`;
     pyCode += `import json\n\n`;
-    pyCode += `qc = QuantumCircuit(${numQubits})\n`;
+    
+    if (hasMeasureGate) {
+      pyCode += `qc = QuantumCircuit(${numQubits}, ${numQubits})\n`;
+    } else {
+      pyCode += `qc = QuantumCircuit(${numQubits})\n`;
+    }
     
     // Add gates
     for (let q = 0; q < numQubits; q++) {
       if (circuit[q]) {
         circuit[q].forEach((gate) => {
-          if (gate.type === "CX") {
+          if (gate.type === "CX" || gate.type === "SWAP") {
             let target = gate.target !== undefined ? gate.target : ((q + 1) % numQubits);
             if (numQubits > 1) {
-                pyCode += `qc.cx(${q}, ${target})\n`;
+                pyCode += `qc.${gate.type.toLowerCase()}(${q}, ${target})\n`;
             } else {
-                pyCode += `# cx skipped (only 1 qubit available)\n`;
+                pyCode += `# ${gate.type.toLowerCase()} skipped (only 1 qubit available)\n`;
             }
           } else if (gate.type === "I") {
             pyCode += `qc.id(${q})\n`;
+          } else if (gate.type === "M") {
+            pyCode += `qc.measure(${q}, ${q})\n`;
           } else {
             pyCode += `qc.${gate.type.toLowerCase()}(${q})\n`;
           }
@@ -208,7 +228,9 @@ export default function CircuitSimulatorPage() {
       }
     }
     
-    pyCode += `\nqc.measure_all()\n`;
+    if (!hasMeasureGate) {
+      pyCode += `\nqc.measure_all()\n`;
+    }
 
     pyCode += `
 from qiskit.visualization import circuit_drawer, plot_histogram

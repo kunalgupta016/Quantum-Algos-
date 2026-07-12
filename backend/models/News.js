@@ -25,6 +25,10 @@ const NewsSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    content: {
+      type: String,
+      default: "", // Full rich text content
+    },
     isFeatured: {
       type: Boolean,
       default: false,

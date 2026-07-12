@@ -26,6 +26,12 @@ const icons = {
       <polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /><line x1="12" y1="2" x2="12" y2="22" opacity="0.3" />
     </svg>
   ),
+  playground: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="6" width="20" height="12" rx="2" />
+      <path d="M6 12h4m-2-2v4m8-2h.01M16 10h.01" />
+    </svg>
+  ),
 };
 
 import { useAuth } from "../../context/AuthContext";

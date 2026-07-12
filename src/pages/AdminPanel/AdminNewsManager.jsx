@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getNews, createNews, updateNews, deleteNews } from "../../services/api";
+import RichTextEditor from "../../components/RichTextEditor/RichTextEditor";
 
 export default function AdminNewsManager() {
   const [news, setNews] = useState([]);
@@ -7,7 +8,7 @@ export default function AdminNewsManager() {
   const [editingId, setEditingId] = useState(null);
   
   const [formData, setFormData] = useState({
-    title: "", source: "", date: "", tag: "", excerpt: "", isFeatured: false
+    title: "", source: "", date: "", tag: "", excerpt: "", content: "", isFeatured: false
   });
 
   useEffect(() => {
@@ -34,13 +35,14 @@ export default function AdminNewsManager() {
       date: item.date,
       tag: item.tag,
       excerpt: item.excerpt,
+      content: item.content || "",
       isFeatured: item.isFeatured
     });
   }
 
   function handleCancel() {
     setEditingId(null);
-    setFormData({ title: "", source: "", date: "", tag: "", excerpt: "", isFeatured: false });
+    setFormData({ title: "", source: "", date: "", tag: "", excerpt: "", content: "", isFeatured: false });
   }
 
   async function handleSubmit(e) {
@@ -52,10 +54,11 @@ export default function AdminNewsManager() {
       { key: 'source', label: 'Source' },
       { key: 'date', label: 'Date' },
       { key: 'tag', label: 'Tag' },
-      { key: 'excerpt', label: 'Excerpt' }
+      { key: 'excerpt', label: 'Excerpt' },
+      { key: 'content', label: 'Content' }
     ];
     for (let field of requiredFields) {
-      if (!formData[field.key]) {
+      if (!formData[field.key] || formData[field.key] === '<p><br></p>') {
         alert(`Please fill the required field: ${field.label}`);
         return;
       }
@@ -121,11 +124,21 @@ export default function AdminNewsManager() {
               />
             </div>
             <textarea 
-              placeholder="Excerpt" required rows="3"
+              placeholder="Excerpt (Short summary)" required rows="2"
               value={formData.excerpt} onChange={e => setFormData({...formData, excerpt: e.target.value})}
               className="p-3 bg-[var(--color-app-base)] border border-[var(--color-app-border)] rounded text-sm outline-none text-[var(--color-app-text-main)]"
             />
-            <label className="flex items-center gap-2 text-sm text-[var(--color-app-text-muted)] cursor-pointer">
+            
+            <div className="flex flex-col gap-2">
+              <span className="text-xs text-[var(--color-app-text-muted)] font-bold ml-2">Content Editor</span>
+              <RichTextEditor 
+                value={formData.content} 
+                onChange={val => setFormData(prev => ({...prev, content: val}))} 
+                placeholder="Write your news article here..."
+              />
+            </div>
+
+            <label className="flex items-center gap-2 text-sm text-[var(--color-app-text-muted)] cursor-pointer mt-2">
               <input 
                 type="checkbox" 
                 checked={formData.isFeatured} 

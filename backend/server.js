@@ -22,6 +22,8 @@ const sandboxRoutes = require("./routes/sandboxRoutes");
 const authRoutes = require("./routes/authRoutes");
 const contentRoutes = require("./routes/contentRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
+const challengeRoutes = require("./routes/challengeRoutes");
+const playgroundRoutes = require("./routes/playgroundRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -89,6 +91,8 @@ app.use("/api/auth", authLimiter); // Apply strict rate limit to auth
 app.use("/api", authRoutes);
 app.use("/api", contentRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api", challengeRoutes);
+app.use("/api", playgroundRoutes);
 
 // ─── Health check ────────────────────────────────
 app.get("/", (req, res) => {

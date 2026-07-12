@@ -1,10 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import Footer from "../../components/Footer/Footer";
 import QuantumAtom3D from "../../components/QuantumAtom3D/QuantumAtom3D";
+import { getNews, getBlogs } from "../../services/api";
 import "./LandingPage.css";
 
 /* ─── Animation Helpers ───────────────────────────── */
@@ -87,31 +88,15 @@ const features = [
 ];
 
 const quantumImages = [
-  { title: "Bloch Sphere Visualization", desc: "3D representation of qubit states on the Bloch sphere", gradient: "from-blue-500/20 to-purple-500/20", icon: "🌐" },
-  { title: "Quantum Circuit Diagram", desc: "Multi-qubit quantum circuit with gates and measurements", gradient: "from-cyan-500/20 to-blue-500/20", icon: "⚡" },
-  { title: "Probability Distribution", desc: "Measurement outcomes showing quantum superposition collapse", gradient: "from-violet-500/20 to-pink-500/20", icon: "📊" },
-  { title: "Entanglement Network", desc: "Visualization of quantum entanglement between qubits", gradient: "from-emerald-500/20 to-teal-500/20", icon: "🔗" },
-  { title: "Quantum Error Correction", desc: "Surface codes and error syndrome detection patterns", gradient: "from-amber-500/20 to-orange-500/20", icon: "🛡️" },
-  { title: "Quantum Phase Space", desc: "Wigner function representation of quantum states", gradient: "from-rose-500/20 to-red-500/20", icon: "🌀" },
+  { title: "Bloch Sphere Visualization", desc: "3D representation of qubit states on the Bloch sphere", gradient: "from-blue-500/10 to-transparent", icon: "🌐" },
+  { title: "Quantum Circuit Diagram", desc: "Multi-qubit quantum circuit with gates and measurements", gradient: "from-cyan-500/10 to-transparent", icon: "⚡" },
+  { title: "Probability Distribution", desc: "Measurement outcomes showing quantum superposition collapse", gradient: "from-violet-500/10 to-transparent", icon: "📊" },
+  { title: "Entanglement Network", desc: "Visualization of quantum entanglement between qubits", gradient: "from-emerald-500/10 to-transparent", icon: "🔗" },
+  { title: "Quantum Error Correction", desc: "Surface codes and error syndrome detection patterns", gradient: "from-amber-500/10 to-transparent", icon: "🛡️" },
+  { title: "Quantum Phase Space", desc: "Wigner function representation of quantum states", gradient: "from-rose-500/10 to-transparent", icon: "🌀" },
 ];
 
-const newsItems = [
-  { title: "IBM Unveils 1000+ Qubit Processor", source: "Nature", date: "2026", tag: "Hardware" },
-  { title: "Google Achieves Quantum Error Correction Milestone", source: "Science", date: "2026", tag: "Research" },
-  { title: "India Launches National Quantum Mission Phase II", source: "DST", date: "2026", tag: "Policy" },
-  { title: "Quantum Computing Market to Reach $125B by 2030", source: "McKinsey", date: "2026", tag: "Industry" },
-  { title: "New Quantum Algorithm Breaks Optimization Records", source: "arXiv", date: "2026", tag: "Algorithm" },
-  { title: "DRDO Deploys Quantum Key Distribution Network", source: "DRDO", date: "2026", tag: "Defence" },
-];
-
-const blogPosts = [
-  { title: "Understanding Quantum Superposition", excerpt: "A deep dive into one of the most fundamental concepts in quantum mechanics and how it enables quantum computing.", readTime: "8 min", category: "Fundamentals" },
-  { title: "Grover's Algorithm Explained", excerpt: "How Grover's search algorithm achieves quadratic speedup and its practical applications in database search.", readTime: "12 min", category: "Algorithms" },
-  { title: "The Future of Quantum Cryptography", excerpt: "How quantum key distribution protocols like BB84 are reshaping the landscape of secure communications.", readTime: "10 min", category: "Cryptography" },
-  { title: "NISQ Era: What Can We Do Today?", excerpt: "Exploring the capabilities and limitations of Noisy Intermediate-Scale Quantum computers in the current era.", readTime: "15 min", category: "Industry" },
-  { title: "Variational Quantum Algorithms", excerpt: "VQE, VQC, and QAOA — hybrid quantum-classical algorithms pushing the boundaries of quantum advantage.", readTime: "11 min", category: "Research" },
-  { title: "Quantum Machine Learning", excerpt: "How quantum computing is transforming machine learning with exponential speedups in specific problem domains.", readTime: "9 min", category: "ML" },
-];
+// Static data removed, fetching from API now.
 
 /* ═══════════════════════════════════════════════════════
    LANDING PAGE COMPONENT
@@ -120,6 +105,23 @@ const blogPosts = [
 export default function LandingPage() {
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
+  
+  const [newsItems, setNewsItems] = useState([]);
+  const [blogPosts, setBlogPosts] = useState([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [newsRes, blogsRes] = await Promise.all([getNews(), getBlogs()]);
+        // Limit to 6 items each
+        setNewsItems(newsRes.slice(0, 6));
+        setBlogPosts(blogsRes.slice(0, 6));
+      } catch (err) {
+        console.error("Failed to fetch landing page content:", err);
+      }
+    }
+    fetchData();
+  }, []);
 
   const handleGetStarted = () => {
     navigate(isLoggedIn ? "/dashboard" : "/login");
@@ -264,20 +266,21 @@ export default function LandingPage() {
         <div className="landing-news-scroll">
           {newsItems.map((item, i) => (
             <motion.div
-              key={item.title}
-              className="landing-news-card"
+              key={item._id || item.title}
+              className="landing-news-card cursor-pointer"
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08, duration: 0.5 }}
               whileHover={{ y: -4 }}
+              onClick={() => navigate(`/news/${item._id}`)}
             >
               <span className="landing-news-tag">{item.tag}</span>
               <h4 className="landing-news-title">{item.title}</h4>
               <div className="landing-news-meta">
                 <span>{item.source}</span>
                 <span>•</span>
-                <span>{item.date}</span>
+                <span>{new Date(item.date).toLocaleDateString() || item.date}</span>
               </div>
             </motion.div>
           ))}
@@ -295,15 +298,14 @@ export default function LandingPage() {
         <div className="landing-blogs-grid">
           {blogPosts.map((post, i) => (
             <motion.div
-              key={post.title}
-              className="landing-blog-card"
+              key={post._id || post.title}
+              className="landing-blog-card cursor-pointer"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08, duration: 0.5 }}
               whileHover={{ y: -6, boxShadow: "0 20px 40px rgba(0,0,0,0.2)" }}
-              onClick={() => navigate("/blogs")}
-              style={{ cursor: "pointer" }}
+              onClick={() => navigate(`/blogs/${post._id}`)}
             >
               <div className="landing-blog-category">{post.category}</div>
               <h4 className="landing-blog-title">{post.title}</h4>

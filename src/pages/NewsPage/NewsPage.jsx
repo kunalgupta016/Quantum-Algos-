@@ -3,6 +3,7 @@ import Navbar from "../../components/Navbar/Navbar";
 import Footer from "../../components/Footer/Footer";
 
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { getNews } from "../../services/api";
 
 const tagColors = {
@@ -17,6 +18,7 @@ const tagColors = {
 };
 
 export default function NewsPage() {
+  const navigate = useNavigate();
   const [newsItems, setNewsItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -80,6 +82,7 @@ export default function NewsPage() {
               marginBottom: "2.5rem",
               cursor: "pointer",
             }}
+            onClick={() => navigate(`/news/${featuredNews._id}`)}
           >
             <span style={{
               display: "inline-block",
@@ -126,6 +129,7 @@ export default function NewsPage() {
                 cursor: "pointer",
                 transition: "all 0.3s",
               }}
+              onClick={() => navigate(`/news/${item._id}`)}
             >
               <span style={{
                 display: "inline-block",

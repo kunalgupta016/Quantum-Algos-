@@ -192,4 +192,33 @@ export async function uploadImage(file) {
   return response.data;
 }
 
+// ═══════════════════════════════════════════════════════
+// CHALLENGES APIs
+// ═══════════════════════════════════════════════════════
+
+export async function runChallengeCircuit(numQubits, gates, targetState) {
+  const response = await apiClient.post("/challenge/run", { numQubits, gates, targetState });
+  return response.data;
+}
+
+export async function getChallenges() {
+  const response = await apiClient.get("/challenges");
+  return response.data;
+}
+
+export async function createChallenge(data) {
+  const response = await apiClient.post("/admin/challenges", data);
+  return response.data;
+}
+
+export async function updateChallenge(id, data) {
+  const response = await apiClient.put(`/admin/challenges/${id}`, data);
+  return response.data;
+}
+
+export async function deleteChallenge(id) {
+  const response = await apiClient.delete(`/admin/challenges/${id}`);
+  return response.data;
+}
+
 export default apiClient;
