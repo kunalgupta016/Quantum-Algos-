@@ -65,7 +65,7 @@ app.use(globalLimiter);
 // Strict rate limit for auth endpoints
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 15, // max 15 login/register attempts per 15 min
+  max: IS_PRODUCTION ? 15 : 1000, // max 15 in prod, 1000 in dev
   message: { error: "Too many login attempts. Please try again later." },
   standardHeaders: true,
   legacyHeaders: false,
