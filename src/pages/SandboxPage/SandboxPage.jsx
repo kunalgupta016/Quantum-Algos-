@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from "react";
-import { runSandboxCode } from "../../services/api";
+import { runSandboxCode, installSandboxPackages } from "../../services/api";
 import GraphViewer from "../../components/GraphViewer/GraphViewer";
 import Loading from "../../components/Loading/Loading";
 import EditorModule from "react-simple-code-editor";
@@ -265,6 +265,21 @@ export default function SandboxPage() {
   const [globalLoading, setGlobalLoading] = useState(false);
   const fileInputRef = useRef(null);
 
+  const [packages, setPackages] = useState("");
+  const [installStatus, setInstallStatus] = useState(null); // { status: "loading" | "success" | "error", message: "" }
+
+  const handleInstallPackages = async () => {
+    if (!packages.trim()) return;
+    setInstallStatus({ status: "loading", message: "Installing..." });
+    try {
+      const res = await installSandboxPackages(packages);
+      setInstallStatus({ status: "success", message: res.message || "Packages installed!" });
+      setTimeout(() => setInstallStatus(null), 5000);
+    } catch (err) {
+      setInstallStatus({ status: "error", message: err.response?.data?.error || "Installation failed" });
+    }
+  };
+
   const updateCellCode = useCallback((cellId, code) => {
     setCells((prev) =>
       prev.map((c) => (c.id === cellId ? { ...c, code } : c))
@@ -453,6 +468,50 @@ export default function SandboxPage() {
                 ▶▶ Run All
               </button>
             </div>
+          </div>
+
+          {/* Package Installer */}
+          <div className="mb-4 app-glass p-3 rounded-lg border border-[var(--color-app-border)]">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-[var(--color-app-text-main)] uppercase tracking-wider">
+                Dependencies
+              </span>
+              <input
+                type="text"
+                value={packages}
+                onChange={(e) => setPackages(e.target.value)}
+                placeholder="e.g. tensorflow, pytorch"
+                className="flex-1 rounded-md bg-[var(--color-app-surface)] px-3 py-1.5 text-xs text-[var(--color-app-text-main)] outline-none border border-[var(--color-app-border-light)] focus:border-[var(--color-app-primary)] transition"
+              />
+              <button
+                onClick={handleInstallPackages}
+                disabled={!packages.trim() || installStatus?.status === "loading"}
+                className="rounded-md bg-[var(--color-app-surface-hover)] px-4 py-1.5 text-xs font-bold text-[var(--color-app-text-light)] hover:bg-[var(--color-app-primary)] hover:text-white transition-all disabled:opacity-50 border border-[var(--color-app-border-light)] hover:border-transparent flex items-center gap-2"
+              >
+                {installStatus?.status === "loading" && (
+                  <svg className="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                )}
+                Install
+              </button>
+              {installStatus?.status === "success" && (
+                <span className="text-xs font-medium text-[var(--color-app-success)] flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg>
+                  {installStatus.message}
+                </span>
+              )}
+              {installStatus?.status === "error" && (
+                <span className="text-xs font-medium text-[var(--color-app-error)] flex items-center gap-1 max-w-[200px] truncate" title={installStatus.message}>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                  Error
+                </span>
+              )}
+            </div>
+            <p className="mt-2 text-[10px] text-[var(--color-app-text-muted)]">
+              <span className="font-semibold">Pre-installed:</span> qiskit, qiskit-aer, numpy, scipy, pandas, matplotlib, scikit-learn, sympy, networkx
+            </p>
           </div>
 
           {/* Toolbar */}

@@ -108,6 +108,11 @@ export async function runSandboxCode(payload) {
   return response.data;
 }
 
+export async function installSandboxPackages(packages) {
+  const response = await apiClient.post("/sandbox/install", { packages });
+  return response.data;
+}
+
 // ═══════════════════════════════════════════════════════
 // CMS (Content Management) APIs
 // ═══════════════════════════════════════════════════════

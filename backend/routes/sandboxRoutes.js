@@ -6,8 +6,9 @@
 
 const express = require("express");
 const router = express.Router();
-const { runSandboxCode } = require("../controllers/sandboxController");
+const { runSandboxCode, installPackages } = require("../controllers/sandboxController");
 
 router.post("/sandbox/run", runSandboxCode);
+router.post("/sandbox/install", installPackages);
 
 module.exports = router;

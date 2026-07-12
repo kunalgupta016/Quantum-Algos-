@@ -47,9 +47,31 @@ function runSandboxCode(req, res) {
         cell_type: "code",
         metadata: {},
         source: [
-          "%matplotlib inline\n",
           "import matplotlib\n",
           "matplotlib.use('agg')\n",
+          "import matplotlib.pyplot as plt\n",
+          "import io\n",
+          "import builtins\n",
+          "import IPython.display as ipd\n",
+          "from IPython.display import display as original_display, Image\n",
+          "def custom_display(*objs, **kwargs):\n",
+          "    for obj in objs:\n",
+          "        if hasattr(obj, 'savefig'):\n",
+          "            buf = io.BytesIO()\n",
+          "            obj.savefig(buf, format='png', bbox_inches='tight')\n",
+          "            buf.seek(0)\n",
+          "            original_display(Image(data=buf.read(), format='png'))\n",
+          "        else:\n",
+          "            original_display(obj, **kwargs)\n",
+          "ipd.display = custom_display\n",
+          "builtins.display = custom_display\n",
+          "def custom_show():\n",
+          "    buf = io.BytesIO()\n",
+          "    plt.savefig(buf, format='png', bbox_inches='tight')\n",
+          "    buf.seek(0)\n",
+          "    original_display(Image(data=buf.read(), format='png'))\n",
+          "    plt.clf()\n",
+          "plt.show = custom_show\n"
         ],
         outputs: [],
         execution_count: null,
@@ -165,4 +187,35 @@ function extractNotebookOutputs(notebookPath) {
   return results;
 }
 
-module.exports = { runSandboxCode, extractNotebookOutputs };
+function installPackages(req, res) {
+  const { packages } = req.body;
+  if (!packages || typeof packages !== "string") {
+    return res.status(400).json({ error: "packages string is required" });
+  }
+
+  // Sanitize the input to prevent command injection
+  const safePackages = packages.replace(/[^a-zA-Z0-9_\-\. ]/g, "").trim();
+  if (!safePackages) {
+    return res.status(400).json({ error: "Invalid packages format" });
+  }
+
+  console.log("Sandbox: Installing packages:", safePackages);
+
+  // We use standard pip install. Timeout is generous (120s) because network/compilation might take time.
+  const command = `"${PYTHON_PATH}" -m pip install -q ${safePackages}`;
+
+  exec(command, { timeout: 120000 }, (error, stdout, stderr) => {
+    if (error) {
+      console.error("Sandbox package installation error:", error.message, stderr);
+      return res.status(500).json({ error: "Failed to install packages. " + (stderr || error.message) });
+    }
+    
+    return res.json({ success: true, message: "Packages installed successfully." });
+  });
+}
+
+module.exports = {
+  runSandboxCode,
+  extractNotebookOutputs,
+  installPackages,
+};

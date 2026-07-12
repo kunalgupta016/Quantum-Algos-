@@ -101,7 +101,7 @@ export default function Footer() {
       <div className="footer-bottom">
         <p>© {new Date().getFullYear()} Defence Research & Development Organisation. All rights reserved.</p>
         <p className="footer-bottom-sub" style={{ marginTop: "0.5rem" }}>
-          Built with ❤️ for Scientific Analysis Group (SAG)
+           Scientific Analysis Group (SAG)
         </p>
         <p className="footer-bottom-sub" style={{ marginTop: "0.25rem", fontWeight: 600, color: "var(--color-app-primary)" }}>
           Designed & Developed by Kunal Gupta & Prashant Verma
