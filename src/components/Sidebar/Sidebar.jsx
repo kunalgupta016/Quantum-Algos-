@@ -30,7 +30,7 @@ const icons = {
 
 import { useAuth } from "../../context/AuthContext";
 
-export default function Sidebar({ isOpen, onToggle }) {
+export default function Sidebar({ isOpen, onToggle, isMobile }) {
   const { isAdmin } = useAuth();
 
   return (
@@ -38,11 +38,11 @@ export default function Sidebar({ isOpen, onToggle }) {
       {isOpen ? (
         <motion.aside
           key="open"
-          initial={{ width: 0, opacity: 0 }}
-          animate={{ width: 240, opacity: 1 }}
-          exit={{ width: 0, opacity: 0 }}
+          initial={{ width: 0, opacity: 0, x: isMobile ? -50 : 0 }}
+          animate={{ width: 240, opacity: 1, x: 0 }}
+          exit={{ width: 0, opacity: 0, x: isMobile ? -50 : 0 }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="sidebar-container"
+          className={`sidebar-container ${isMobile ? "fixed inset-y-0 left-0 z-50 shadow-2xl" : ""}`}
         >
           <div className="sidebar-header">
             <span className="sidebar-title">Navigation</span>
@@ -58,6 +58,7 @@ export default function Sidebar({ isOpen, onToggle }) {
               <NavLink
                 key={link.path}
                 to={link.path}
+                onClick={isMobile ? onToggle : undefined}
                 className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`}
               >
                 <span className="sidebar-link-icon">
@@ -70,6 +71,7 @@ export default function Sidebar({ isOpen, onToggle }) {
             {isAdmin && (
               <NavLink
                 to="/admin"
+                onClick={isMobile ? onToggle : undefined}
                 className={({ isActive }) => `sidebar-link mt-4 !border-[var(--color-app-error)] !bg-[rgba(239,68,68,0.05)] ${isActive ? "active" : ""}`}
               >
                 <span className="sidebar-link-icon text-[var(--color-app-error)]">
@@ -82,7 +84,7 @@ export default function Sidebar({ isOpen, onToggle }) {
             )}
           </nav>
         </motion.aside>
-      ) : (
+      ) : isMobile ? null : (
         <motion.aside
           key="collapsed"
           initial={{ width: 0, opacity: 0 }}

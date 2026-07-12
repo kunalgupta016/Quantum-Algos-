@@ -52,7 +52,10 @@ export default function Navbar() {
           <img src="/logo.png" alt="Logo" className="nav-logo" />
           <div>
             <div className="nav-brand-name">{APP_NAME}</div>
-            <div className="nav-brand-org">{APP_ORG}</div>
+            <div className="nav-brand-org">
+              <span className="hidden md:inline">{APP_ORG}</span>
+              <span className="md:hidden">SAG</span>
+            </div>
           </div>
         </Link>
 
@@ -133,6 +136,41 @@ export default function Navbar() {
               )}
             </AnimatePresence>
           </div>
+
+          {/* Mobile Actions - shown inside mobile dropdown */}
+          <div className="md:hidden flex flex-col gap-3 mt-4 pt-4 border-t border-[var(--color-app-border-light)] w-full pb-2">
+            {isLoggedIn ? (
+              <>
+                <div className="flex flex-col items-start w-full mb-1">
+                  <span className="nav-username text-lg">{user?.username}</span>
+                  <span className={`nav-role ${isAdmin ? "nav-role-admin" : "nav-role-user"}`}>
+                    {isAdmin ? "Admin" : "User"}
+                  </span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="nav-btn-logout w-full text-center py-2"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => { navigate("/login"); setMobileOpen(false); }}
+                  className="nav-btn-outline w-full text-center py-2"
+                >
+                  Register
+                </button>
+                <button
+                  onClick={() => { navigate("/login"); setMobileOpen(false); }}
+                  className="nav-btn-primary w-full text-center py-2"
+                >
+                  Login
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Right: Actions */}
@@ -141,7 +179,7 @@ export default function Navbar() {
 
           {isLoggedIn ? (
             <>
-              <div className="nav-user-info">
+              <div className="nav-user-info hidden md:flex">
                 <span className="nav-username">{user?.username}</span>
                 <span className={`nav-role ${isAdmin ? "nav-role-admin" : "nav-role-user"}`}>
                   {isAdmin ? "Admin" : "User"}
@@ -151,7 +189,7 @@ export default function Navbar() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleLogout}
-                className="nav-btn-logout"
+                className="nav-btn-logout hidden md:block"
               >
                 Logout
               </motion.button>
@@ -162,7 +200,7 @@ export default function Navbar() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate("/login")}
-                className="nav-btn-outline"
+                className="nav-btn-outline hidden md:block"
               >
                 Register
               </motion.button>
@@ -170,7 +208,7 @@ export default function Navbar() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate("/login")}
-                className="nav-btn-primary"
+                className="nav-btn-primary hidden md:block"
               >
                 Login
               </motion.button>
