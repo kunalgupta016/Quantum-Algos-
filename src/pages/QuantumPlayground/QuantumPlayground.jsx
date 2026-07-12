@@ -4,20 +4,6 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 const PLAYGROUND_ITEMS = [
   {
-    icon: "🌐",
-    title: "Bloch Sphere Interactive",
-    desc: "Visualize single-qubit states on the Bloch sphere. Manipulate theta and phi angles to see the vector rotate.",
-    status: "Available",
-    path: "/bloch-sphere",
-  },
-  {
-    icon: "💻",
-    title: "Quantum Circuit Simulator",
-    desc: "Drag and drop gates onto a circuit grid and view the resulting statevector or probabilities in real-time.",
-    status: "Available",
-    path: "/simulator",
-  },
-  {
     icon: "🔗",
     title: "Entanglement Lab",
     desc: "Create and measure Bell States. Witness spooky action at a distance and the collapse of the wavefunction.",
