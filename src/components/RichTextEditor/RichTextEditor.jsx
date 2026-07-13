@@ -62,11 +62,16 @@ export default function RichTextEditor({ value, onChange, placeholder }) {
       'ql-link': 'Insert Link',
       'ql-image': 'Insert Image',
       'ql-video': 'Insert Video',
+      'ql-code-block': 'Insert Code Block',
       'ql-clean': 'Clear Formatting',
       'ql-header': 'Headers'
     };
 
     // A small delay to ensure toolbar is rendered
+    // Bullet List icon (Dots)
+    const bulletListIcon = document.querySelector('.ql-list[value="bullet"]');
+    if (bulletListIcon) bulletListIcon.innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>`;
+
     setTimeout(() => {
       const toolbars = document.querySelectorAll('.ql-toolbar');
       toolbars.forEach(toolbar => {
@@ -94,7 +99,7 @@ export default function RichTextEditor({ value, onChange, placeholder }) {
         [{ 'header': [1, 2, 3, false] }],
         ['bold', 'italic', 'underline', 'strike'],
         [{'list': 'ordered'}, {'list': 'bullet'}],
-        ['link', 'image', 'video'],
+        ['link', 'image', 'video', 'code-block'],
         ['clean']
       ],
       handlers: {
@@ -104,13 +109,19 @@ export default function RichTextEditor({ value, onChange, placeholder }) {
   }), []);
 
   const handleModeToggle = (newMode) => {
-    if (newMode === 'markdown' && mode === 'visual') {
-      setMarkdownText(turndownService.turndown(value || ''));
-      setMode('markdown');
-    } else if (newMode === 'visual' && mode === 'markdown') {
+    if (newMode === mode) return;
+
+    // If leaving markdown, ensure value (HTML) is updated
+    if (mode === 'markdown') {
       onChange(marked.parse(markdownText));
-      setMode('visual');
     }
+
+    // If entering markdown, ensure markdownText is updated from HTML
+    if (newMode === 'markdown') {
+      setMarkdownText(turndownService.turndown(value || ''));
+    }
+
+    setMode(newMode);
   };
 
   const handleMarkdownChange = (e) => {

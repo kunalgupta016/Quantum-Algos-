@@ -7,10 +7,23 @@ const DocSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    subsection: {
+      type: String,
+      default: "",
+      trim: true,
+    },
     title: {
       type: String,
       required: true,
       trim: true,
+    },
+    sectionOrder: {
+      type: Number,
+      default: 0,
+    },
+    order: {
+      type: Number,
+      default: 0,
     },
     content: {
       type: String,

@@ -126,6 +126,10 @@ export async function createDoc(data) {
   const res = await apiClient.post("/docs", data);
   return res.data;
 }
+export async function reorderDocs(updates) {
+  const res = await apiClient.put("/docs/reorder", { updates });
+  return res.data;
+}
 export async function updateDoc(id, data) {
   const res = await apiClient.put(`/docs/${id}`, data);
   return res.data;

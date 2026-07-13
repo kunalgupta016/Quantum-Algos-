@@ -46,6 +46,21 @@ export default function AdminBlogsManager() {
     setFormData({ title: "", category: "", readTime: "", date: "", author: "", excerpt: "", content: "" });
   }
 
+  function handleUseTemplate() {
+    setFormData(prev => ({
+      ...prev,
+      content: `<h2>Understanding [Topic]</h2>
+<p>In this post, we will explore the core concepts of [Topic]...</p>
+<h3>Deep Dive</h3>
+<p>Let's look at the mathematics behind this:</p>
+<pre class="ql-syntax" spellcheck="false"># Paste your Python code here
+def quantum_func():
+    pass
+</pre>
+<p><strong>Conclusion:</strong> We hope this helps you understand the topic better.</p>`
+    }));
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -167,7 +182,18 @@ export default function AdminBlogsManager() {
         <h1 className="text-2xl font-bold mb-8">✍️ Manage Blogs</h1>
 
         <div className="bg-[var(--color-app-surface)] p-6 rounded-xl border border-[var(--color-app-border)] mb-8">
-          <h2 className="text-lg font-bold mb-4">{editingId ? "Edit Blog" : "Add New Blog"}</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-bold">{editingId ? "Edit Blog" : "Add New Blog"}</h2>
+            {!editingId && (
+              <button 
+                type="button" 
+                onClick={handleUseTemplate}
+                className="px-3 py-1 bg-[var(--color-app-primary)]/10 text-[var(--color-app-primary)] text-sm font-semibold rounded hover:bg-[var(--color-app-primary)]/20 transition-colors"
+              >
+                + Start with Template
+              </button>
+            )}
+          </div>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <input 
               type="text" placeholder="Title" required
@@ -205,6 +231,7 @@ export default function AdminBlogsManager() {
             <div className="flex flex-col gap-2">
               <span className="text-xs text-[var(--color-app-text-muted)] font-bold ml-2">Content Editor</span>
               <RichTextEditor 
+                key={editingId || 'new_blog'}
                 value={formData.content} 
                 onChange={val => setFormData(prev => ({...prev, content: val}))} 
                 placeholder="Write your blog post here... (LaTeX math is supported, just wrap in $$ $$)"

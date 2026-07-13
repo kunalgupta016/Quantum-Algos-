@@ -810,3 +810,75 @@ html.lenis, html.lenis body {
 .lenis.lenis-stopped {
   overflow: hidden;
 }
+
+/* -------------------------------------------------------
+   Global Quill Editor Styles (to match WYSIWYG)
+   ------------------------------------------------------- */
+.ql-editor h1, .ql-editor h2, .ql-editor h3, .ql-editor h4 {
+  color: var(--color-app-text-main) !important;
+  font-weight: 800 !important;
+  margin-bottom: 1rem !important;
+  margin-top: 1.5rem !important;
+}
+.ql-editor p {
+  color: var(--color-app-text-main) !important;
+  margin-bottom: 1rem !important;
+  line-height: 1.7 !important;
+}
+.ql-editor a {
+  color: #60a5fa !important;
+  text-decoration: underline !important;
+}
+.ql-editor img {
+  border-radius: 0.75rem !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  margin: 1.5rem 0 !important;
+  max-width: 100% !important;
+}
+.ql-editor pre.ql-syntax {
+  background-color: #0D1117 !important;
+  color: #C9D1D9 !important;
+  border-radius: 0.5rem !important;
+  padding: 1rem !important;
+  border: 1px solid var(--color-app-border) !important;
+}
+.ql-editor iframe.ql-video {
+  width: 100% !important;
+  height: 400px !important;
+  border-radius: 0.75rem !important;
+  margin: 1.5rem 0 !important;
+}
+.ql-editor ol, .ql-editor ul {
+  padding-left: 1.5em !important;
+}
+.ql-editor li {
+  margin-bottom: 0.5em !important;
+  color: var(--color-app-text-main) !important;
+}
+
+/* Fix for Quill 2.x double bullets: Apply custom list styles ONLY to the static viewer */
+.ql-editor:not([contenteditable="true"]) li { list-style-type: none !important; }
+
+/* Handle BOTH Quill's data-list and Markdown's standard ol/ul */
+.ql-editor:not([contenteditable="true"]) ol { counter-reset: list-0; } 
+.ql-editor:not([contenteditable="true"]) li[data-list='ordered'],
+.ql-editor:not([contenteditable="true"]) ol > li { 
+  counter-increment: list-0; 
+}
+
+.ql-editor:not([contenteditable="true"]) li[data-list='ordered']::before,
+.ql-editor:not([contenteditable="true"]) ol > li::before { 
+  content: counter(list-0, decimal) '. ' !important; 
+  margin-right: 0.3em !important;
+  font-weight: bold;
+}
+
+.ql-editor:not([contenteditable="true"]) li[data-list='bullet']::before,
+.ql-editor:not([contenteditable="true"]) ul > li::before { 
+  content: '\2022' !important; 
+  margin-left: -1em !important; 
+  margin-right: 0.3em !important; 
+  font-weight: bold; 
+  display: inline-block; 
+  width: 1em; 
+}

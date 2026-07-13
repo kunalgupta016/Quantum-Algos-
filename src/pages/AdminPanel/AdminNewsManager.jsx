@@ -45,6 +45,20 @@ export default function AdminNewsManager() {
     setFormData({ title: "", source: "", date: "", tag: "", excerpt: "", content: "", isFeatured: false });
   }
 
+  function handleUseTemplate() {
+    setFormData(prev => ({
+      ...prev,
+      content: `<h2>Breaking Quantum Development</h2>
+<p>Today, researchers announced a significant breakthrough in the field of quantum computing...</p>
+<h3>Key Highlights</h3>
+<ul>
+  <li>First major highlight</li>
+  <li>Second major highlight</li>
+</ul>
+<p>This development paves the way for future innovations in <strong>quantum error correction</strong>.</p>`
+    }));
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -99,7 +113,18 @@ export default function AdminNewsManager() {
         <h1 className="text-2xl font-bold mb-8">📰 Manage News</h1>
 
         <div className="bg-[var(--color-app-surface)] p-6 rounded-xl border border-[var(--color-app-border)] mb-8">
-          <h2 className="text-lg font-bold mb-4">{editingId ? "Edit News" : "Add New News"}</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-bold">{editingId ? "Edit News Article" : "Add New Article"}</h2>
+            {!editingId && (
+              <button 
+                type="button" 
+                onClick={handleUseTemplate}
+                className="px-3 py-1 bg-[var(--color-app-primary)]/10 text-[var(--color-app-primary)] text-sm font-semibold rounded hover:bg-[var(--color-app-primary)]/20 transition-colors"
+              >
+                + Start with Template
+              </button>
+            )}
+          </div>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <input 
               type="text" placeholder="Title" required
@@ -132,6 +157,7 @@ export default function AdminNewsManager() {
             <div className="flex flex-col gap-2">
               <span className="text-xs text-[var(--color-app-text-muted)] font-bold ml-2">Content Editor</span>
               <RichTextEditor 
+                key={editingId || 'new_news'}
                 value={formData.content} 
                 onChange={val => setFormData(prev => ({...prev, content: val}))} 
                 placeholder="Write your news article here..."

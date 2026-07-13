@@ -24,7 +24,7 @@ function sanitizeHTML(html) {
 // --- Docs ---
 async function getDocs(req, res) {
   try {
-    const docs = await Doc.find().sort({ section: 1, createdAt: 1 });
+    const docs = await Doc.find().sort({ sectionOrder: 1, order: 1, createdAt: 1 });
     res.json(docs);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch docs." });
@@ -62,6 +62,28 @@ async function deleteDoc(req, res) {
     res.json({ message: "Doc deleted" });
   } catch (error) {
     res.status(500).json({ error: "Failed to delete doc." });
+  }
+}
+
+async function reorderDocs(req, res) {
+  try {
+    const updates = req.body.updates; // Expected array of { id, sectionOrder, order }
+    if (!Array.isArray(updates)) {
+      return res.status(400).json({ error: "Invalid updates payload" });
+    }
+
+    const bulkOps = updates.map(update => ({
+      updateOne: {
+        filter: { _id: update.id },
+        update: { $set: { sectionOrder: update.sectionOrder, order: update.order } }
+      }
+    }));
+
+    await Doc.bulkWrite(bulkOps);
+    res.json({ message: "Docs reordered successfully" });
+  } catch (error) {
+    console.error("Reorder error:", error);
+    res.status(500).json({ error: "Failed to reorder docs." });
   }
 }
 
@@ -206,7 +228,7 @@ async function commentBlog(req, res) {
 }
 
 module.exports = {
-  getDocs, addDoc, updateDoc, deleteDoc,
+  getDocs, addDoc, updateDoc, deleteDoc, reorderDocs,
   getBlogs, addBlog, updateBlog, deleteBlog, likeBlog, commentBlog,
   getNews, addNews, updateNews, deleteNews,
 };

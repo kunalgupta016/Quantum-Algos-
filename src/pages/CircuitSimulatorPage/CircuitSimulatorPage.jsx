@@ -362,12 +362,26 @@ plt.close(fig2)
                 {/* Code Output */}
                 {!simResult.errorText && outputPython && (
                   <div className="mt-8">
-                    <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-[var(--color-app-text-muted)] mb-4 border-b border-[var(--color-app-border)] pb-2">
-                      Generated Qiskit Code
-                    </h3>
-                    <pre className="bg-[#0D1117] text-[#C9D1D9] p-4 rounded-xl overflow-x-auto text-xs font-mono border border-[var(--color-app-border)] shadow-inner">
-                      <code>{outputPython}</code>
-                    </pre>
+                    <div className="rounded-none overflow-hidden bg-[#161616] border border-[#333333] shadow-inner relative mt-6 mb-6">
+                      <button 
+                        onClick={(e) => {
+                          navigator.clipboard.writeText(outputPython);
+                          const btn = e.currentTarget;
+                          const copyIcon = `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>`;
+                          const checkIcon = `<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>`;
+                          btn.innerHTML = checkIcon;
+                          btn.classList.add('!text-[#4ade80]');
+                          setTimeout(() => { btn.innerHTML = copyIcon; btn.classList.remove('!text-[#4ade80]'); }, 2000);
+                        }}
+                        className="absolute top-3 right-3 text-[#8c8c8c] hover:text-white bg-transparent hover:bg-white/10 p-1.5 rounded flex items-center justify-center transition-all z-10"
+                        title="Copy to clipboard"
+                      >
+                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                      </button>
+                      <pre className="!m-0 !p-5 !pr-12 !bg-transparent text-[#f4f4f4] text-[0.85rem] font-mono whitespace-pre-wrap">
+                        <code>{outputPython}</code>
+                      </pre>
+                    </div>
                   </div>
                 )}
               </div>
