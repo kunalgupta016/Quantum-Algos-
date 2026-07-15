@@ -245,7 +245,13 @@ export default function DocsPage() {
   const docsSidebar = [];
   const flatDocs = [];
   
-  docs.forEach(doc => {
+  const sortedDocs = [...docs].sort((a, b) => {
+    if (a.sectionOrder !== b.sectionOrder) return (a.sectionOrder || 0) - (b.sectionOrder || 0);
+    if ((a.subsectionOrder || 0) !== (b.subsectionOrder || 0)) return (a.subsectionOrder || 0) - (b.subsectionOrder || 0);
+    return (a.order || 0) - (b.order || 0);
+  });
+  
+  sortedDocs.forEach(doc => {
     let section = docsSidebar.find(s => s.section === doc.section);
     if (!section) {
       section = { section: doc.section, items: [], subsections: [] };

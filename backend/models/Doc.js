@@ -21,6 +21,10 @@ const DocSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    subsectionOrder: {
+      type: Number,
+      default: 0,
+    },
     order: {
       type: Number,
       default: 0,

@@ -75,7 +75,7 @@ async function reorderDocs(req, res) {
     const bulkOps = updates.map(update => ({
       updateOne: {
         filter: { _id: update.id },
-        update: { $set: { sectionOrder: update.sectionOrder, order: update.order } }
+        update: { $set: { sectionOrder: update.sectionOrder, subsectionOrder: update.subsectionOrder || 0, order: update.order } }
       }
     }));
 

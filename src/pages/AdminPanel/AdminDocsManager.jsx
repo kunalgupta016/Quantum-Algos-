@@ -1,7 +1,35 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import RichTextEditor from "../../components/RichTextEditor/RichTextEditor";
 import { getDocs, createDoc, updateDoc, deleteDoc, reorderDocs } from "../../services/api";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+function SortableItem({ id, children, className }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    zIndex: isDragging ? 999 : 'auto',
+    position: isDragging ? 'relative' : 'static',
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className={className}>
+      <div className="flex items-start gap-2 w-full">
+        <div {...attributes} {...listeners} className="cursor-grab text-[var(--color-app-text-muted)] hover:text-white mt-1.5 p-1 flex-shrink-0" style={{ touchAction: 'none' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM8 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM8 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM16 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM16 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM16 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/></svg>
+        </div>
+        <div className="flex-1 min-w-0">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminDocsManager() {
   const [docs, setDocs] = useState([]);
@@ -13,7 +41,10 @@ export default function AdminDocsManager() {
     section: "", subsection: "", title: "", content: ""
   });
 
-  const uniqueSections = [...new Set(docs.map(d => d.section))];
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   useEffect(() => {
     fetchDocs();
@@ -31,6 +62,43 @@ export default function AdminDocsManager() {
     }
   }
 
+  const uniqueSections = [...new Set(docs.map(d => d.section))];
+
+  const sectionGroups = useMemo(() => {
+    const sortedDocs = [...docs].sort((a, b) => {
+      if (a.sectionOrder !== b.sectionOrder) return (a.sectionOrder || 0) - (b.sectionOrder || 0);
+      if ((a.subsectionOrder || 0) !== (b.subsectionOrder || 0)) return (a.subsectionOrder || 0) - (b.subsectionOrder || 0);
+      return (a.order || 0) - (b.order || 0);
+    });
+
+    const groups = [];
+    sortedDocs.forEach(doc => {
+      let sGroup = groups.find(s => s.name === doc.section);
+      if (!sGroup) {
+        sGroup = { 
+          name: doc.section, 
+          id: `section_${btoa(unescape(encodeURIComponent(doc.section)))}`, 
+          subsections: [] 
+        };
+        groups.push(sGroup);
+      }
+      
+      let subName = doc.subsection || "";
+      let subGroup = sGroup.subsections.find(s => s.name === subName);
+      if (!subGroup) {
+        subGroup = { 
+          name: subName, 
+          id: `subsec_${sGroup.id}_${btoa(unescape(encodeURIComponent(subName)))}`, 
+          modules: [] 
+        };
+        sGroup.subsections.push(subGroup);
+      }
+      
+      subGroup.modules.push({ ...doc, dragId: `mod_${doc._id}` });
+    });
+    return groups;
+  }, [docs]);
+
   function handleEdit(item) {
     setEditingId(item._id);
     setFormData({
@@ -39,6 +107,7 @@ export default function AdminDocsManager() {
       title: item.title,
       content: item.content
     });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function handleCancel() {
@@ -50,21 +119,13 @@ export default function AdminDocsManager() {
   function handleUseTemplate() {
     setFormData(prev => ({
       ...prev,
-      content: `<h2>Introduction to [Topic]</h2>
-<p>This is a brief introduction to what you are explaining. Replace this text with your own explanation.</p>
-<h3>Example Scenario</h3>
-<p>Here is a practical example:</p>
-<pre class="ql-syntax" spellcheck="false"># Paste your Python/Qiskit code here
-import qiskit
-</pre>
-<p><strong>Next Steps:</strong> You can explore more in the next module.</p>`
+      content: `<h2>Introduction to [Topic]</h2>\n<p>This is a brief introduction to what you are explaining. Replace this text with your own explanation.</p>\n<h3>Example Scenario</h3>\n<p>Here is a practical example:</p>\n<pre class="ql-syntax" spellcheck="false"># Paste your Python/Qiskit code here\nimport qiskit\n</pre>\n<p><strong>Next Steps:</strong> You can explore more in the next module.</p>`
     }));
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
 
-    // Validation
     const requiredFields = [
       { key: 'section', label: 'Section' },
       { key: 'title', label: 'Title' },
@@ -104,50 +165,98 @@ import qiskit
     }
   }
 
-  async function handleMoveSection(index, direction) {
-    const sections = [...uniqueSections];
-    if (direction === -1 && index > 0) {
-      [sections[index - 1], sections[index]] = [sections[index], sections[index - 1]];
-    } else if (direction === 1 && index < sections.length - 1) {
-      [sections[index], sections[index + 1]] = [sections[index + 1], sections[index]];
-    } else {
-      return;
-    }
-    await saveNewOrder(sections, docs);
-  }
-
-  async function handleMoveModule(section, index, direction) {
-    const sectionDocs = docs.filter(d => d.section === section);
-    if (direction === -1 && index > 0) {
-      [sectionDocs[index - 1], sectionDocs[index]] = [sectionDocs[index], sectionDocs[index - 1]];
-    } else if (direction === 1 && index < sectionDocs.length - 1) {
-      [sectionDocs[index], sectionDocs[index + 1]] = [sectionDocs[index + 1], sectionDocs[index]];
-    } else {
-      return;
-    }
-    // Reconstruct docs array with new module order
-    const otherDocs = docs.filter(d => d.section !== section);
-    await saveNewOrder(uniqueSections, [...otherDocs, ...sectionDocs]);
-  }
-
-  async function saveNewOrder(sectionsList, allDocs) {
-    const updates = [];
-    sectionsList.forEach((sec, sIdx) => {
-      const sDocs = allDocs.filter(d => d.section === sec);
-      sDocs.forEach((d, dIdx) => {
-        updates.push({ id: d._id, sectionOrder: sIdx, order: dIdx });
-      });
-    });
-    
-    // Optimistic update locally
-    setDocs(allDocs); 
+  async function saveNewOrder(allDocs) {
+    const updates = allDocs.map(d => ({
+      id: d._id,
+      sectionOrder: d.sectionOrder || 0,
+      subsectionOrder: d.subsectionOrder || 0,
+      order: d.order || 0
+    }));
 
     try {
       await reorderDocs(updates);
-      fetchDocs();
+      // Wait for reorder to complete before fetching fresh to avoid glitch
     } catch (err) {
       console.error("Failed to reorder", err);
       alert("Failed to save new order");
+    }
+  }
+
+  async function handleDragEnd(event) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const activeId = String(active.id);
+    const overId = String(over.id);
+
+    let updatedDocs = [...docs];
+
+    // 1. Reorder Sections
+    if (activeId.startsWith('section_') && overId.startsWith('section_')) {
+      const activeGroup = sectionGroups.find(s => s.id === activeId);
+      const overGroup = sectionGroups.find(s => s.id === overId);
+      
+      if (activeGroup && overGroup) {
+        const sections = sectionGroups.map(s => s.name);
+        const oldIndex = sections.indexOf(activeGroup.name);
+        const newIndex = sections.indexOf(overGroup.name);
+        const newSections = arrayMove(sections, oldIndex, newIndex);
+        
+        updatedDocs = updatedDocs.map(d => ({
+          ...d,
+          sectionOrder: newSections.indexOf(d.section)
+        }));
+      }
+    }
+    // 2. Reorder Subsections
+    else if (activeId.startsWith('subsec_') && overId.startsWith('subsec_')) {
+      const sGroup = sectionGroups.find(s => s.subsections.some(sub => sub.id === activeId) && s.subsections.some(sub => sub.id === overId));
+      if (sGroup) {
+        const activeSub = sGroup.subsections.find(sub => sub.id === activeId);
+        const overSub = sGroup.subsections.find(sub => sub.id === overId);
+        
+        const subNames = sGroup.subsections.map(s => s.name);
+        const oldIndex = subNames.indexOf(activeSub.name);
+        const newIndex = subNames.indexOf(overSub.name);
+        const newSubNames = arrayMove(subNames, oldIndex, newIndex);
+        
+        updatedDocs = updatedDocs.map(d => {
+          if (d.section === sGroup.name) {
+            return { ...d, subsectionOrder: newSubNames.indexOf(d.subsection || "") };
+          }
+          return d;
+        });
+      }
+    }
+    // 3. Reorder Modules
+    else if (activeId.startsWith('mod_') && overId.startsWith('mod_')) {
+      const activeDocId = activeId.replace('mod_', '');
+      const overDocId = overId.replace('mod_', '');
+      
+      const activeDoc = updatedDocs.find(d => d._id === activeDocId);
+      const overDoc = updatedDocs.find(d => d._id === overDocId);
+      
+      if (activeDoc && overDoc && activeDoc.section === overDoc.section && (activeDoc.subsection || "") === (overDoc.subsection || "")) {
+        const groupDocs = updatedDocs.filter(d => d.section === activeDoc.section && (d.subsection || "") === (activeDoc.subsection || ""));
+        groupDocs.sort((a, b) => (a.order || 0) - (b.order || 0));
+        
+        const oldIndex = groupDocs.findIndex(d => d._id === activeDocId);
+        const newIndex = groupDocs.findIndex(d => d._id === overDocId);
+        const newGroupDocs = arrayMove(groupDocs, oldIndex, newIndex);
+        
+        updatedDocs = updatedDocs.map(d => {
+          const foundIndex = newGroupDocs.findIndex(ngd => ngd._id === d._id);
+          if (foundIndex !== -1) {
+            return { ...d, order: foundIndex };
+          }
+          return d;
+        });
+      }
+    }
+
+    if (updatedDocs !== docs) {
+      setDocs(updatedDocs); // Optimistic UI update
+      await saveNewOrder(updatedDocs);
     }
   }
 
@@ -231,53 +340,57 @@ import qiskit
           </form>
         </div>
 
-        <div className="flex flex-col gap-6">
-          {uniqueSections.map((section, sIdx) => {
-            const sectionDocs = docs.filter(d => d.section === section);
-            return (
-              <div key={section} className="bg-[var(--color-app-surface)] border border-[var(--color-app-border)] p-4 rounded-xl">
-                <div className="flex justify-between items-center mb-4 pb-2 border-b border-[var(--color-app-border)]">
-                  <h3 className="font-bold text-lg text-[var(--color-app-text-main)] flex items-center gap-2">
-                    📁 {section}
-                  </h3>
-                  <div className="flex gap-1">
-                    <button onClick={() => handleMoveSection(sIdx, -1)} disabled={sIdx === 0} className="p-1.5 bg-gray-500/10 text-[var(--color-app-text-muted)] rounded hover:bg-gray-500/20 hover:text-[var(--color-app-text-main)] disabled:opacity-30 transition-colors" title="Move Section Up">
-                      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7"></path></svg>
-                    </button>
-                    <button onClick={() => handleMoveSection(sIdx, 1)} disabled={sIdx === uniqueSections.length - 1} className="p-1.5 bg-gray-500/10 text-[var(--color-app-text-muted)] rounded hover:bg-gray-500/20 hover:text-[var(--color-app-text-main)] disabled:opacity-30 transition-colors" title="Move Section Down">
-                      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={sectionGroups.map(s => s.id)} strategy={verticalListSortingStrategy}>
+            <div className="flex flex-col gap-6 pb-20">
+              {sectionGroups.map(sGroup => (
+                <SortableItem key={sGroup.id} id={sGroup.id} className="bg-[var(--color-app-surface)] border border-[var(--color-app-border)] p-4 rounded-xl">
+                  <div className="w-full">
+                    <h3 className="font-bold text-lg text-[var(--color-app-text-main)] mb-4 pb-2 border-b border-[var(--color-app-border)]">
+                      📁 {sGroup.name}
+                    </h3>
                   </div>
-                </div>
-                
-                <div className="flex flex-col gap-2">
-                  {sectionDocs.map((item, dIdx) => (
-                    <div key={item._id} className="bg-[var(--color-app-base)] border border-[var(--color-app-border-light)] p-3 rounded flex justify-between items-center">
-                      <div className="flex items-center gap-3">
-                        <div className="flex flex-col gap-0.5">
-                          <button onClick={() => handleMoveModule(section, dIdx, -1)} disabled={dIdx === 0} className="p-0.5 text-[var(--color-app-text-muted)] hover:text-[var(--color-app-text-main)] disabled:opacity-30 transition-colors" title="Move Module Up">
-                            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7"></path></svg>
-                          </button>
-                          <button onClick={() => handleMoveModule(section, dIdx, 1)} disabled={dIdx === sectionDocs.length - 1} className="p-0.5 text-[var(--color-app-text-muted)] hover:text-[var(--color-app-text-main)] disabled:opacity-30 transition-colors" title="Move Module Down">
-                            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path></svg>
-                          </button>
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-sm text-[var(--color-app-text-main)]">{item.title}</h4>
-                          {item.subsection && <p className="text-xs text-[var(--color-app-text-muted)] mt-0.5">↳ {item.subsection}</p>}
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <button onClick={() => handleEdit(item)} className="text-xs bg-blue-500/20 text-blue-400 px-3 py-1 rounded hover:bg-blue-500/30">Edit</button>
-                        <button onClick={() => handleDelete(item._id)} className="text-xs bg-red-500/20 text-red-400 px-3 py-1 rounded hover:bg-red-500/30">Delete</button>
-                      </div>
+                  
+                  <SortableContext items={sGroup.subsections.map(sub => sub.id)} strategy={verticalListSortingStrategy}>
+                    <div className="flex flex-col gap-6">
+                      {sGroup.subsections.map(sub => (
+                        <SortableItem key={sub.id} id={sub.id} className={sub.name ? "pl-2 border-l-2 border-[var(--color-app-border)] ml-2" : ""}>
+                          {sub.name && (
+                            <div className="w-full">
+                              <h4 className="font-semibold text-md text-[var(--color-app-text-muted)] mb-3 mt-1">
+                                📂 {sub.name}
+                              </h4>
+                            </div>
+                          )}
+                          
+                          <SortableContext items={sub.modules.map(m => m.dragId)} strategy={verticalListSortingStrategy}>
+                            <div className="flex flex-col gap-2 w-full">
+                              {sub.modules.map(item => (
+                                <SortableItem key={item.dragId} id={item.dragId} className="bg-[var(--color-app-base)] border border-[var(--color-app-border-light)] p-3 rounded w-full">
+                                  <div className="flex justify-between items-center w-full">
+                                    <div className="flex items-center gap-3">
+                                      <div>
+                                        <h4 className="font-semibold text-sm text-[var(--color-app-text-main)]">{item.title}</h4>
+                                      </div>
+                                    </div>
+                                    <div className="flex gap-2">
+                                      <button onClick={() => handleEdit(item)} className="text-xs bg-blue-500/20 text-blue-400 px-3 py-1 rounded hover:bg-blue-500/30 transition">Edit</button>
+                                      <button onClick={() => handleDelete(item._id)} className="text-xs bg-red-500/20 text-red-400 px-3 py-1 rounded hover:bg-red-500/30 transition">Delete</button>
+                                    </div>
+                                  </div>
+                                </SortableItem>
+                              ))}
+                            </div>
+                          </SortableContext>
+                        </SortableItem>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                  </SortableContext>
+                </SortableItem>
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       </div>
     </div>
   );

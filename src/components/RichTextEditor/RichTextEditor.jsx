@@ -213,7 +213,7 @@ export default function RichTextEditor({ value, onChange, placeholder }) {
       
       {mode === 'preview' && (
         <div className="w-full min-h-[400px] p-8 bg-[var(--color-app-base)] overflow-y-auto">
-          <div className="prose prose-sm md:prose-lg max-w-none prose-headings:text-[var(--color-app-text-main)] prose-p:text-[var(--color-app-text-main)] prose-a:text-blue-400 hover:prose-a:text-blue-500 prose-img:rounded-xl prose-img:shadow-2xl">
+          <div className="ql-editor p-0 text-[var(--color-app-text-main)]" style={{ minHeight: 'auto', fontSize: '1.05rem', lineHeight: '1.7' }}>
             <MathHTMLContainer html={value} />
           </div>
         </div>
@@ -279,6 +279,10 @@ export default function RichTextEditor({ value, onChange, placeholder }) {
           height: 400px;
           border-radius: 0.75rem;
           margin: 1.5rem 0;
+        }
+        .ql-editor.ql-blank::before {
+          color: var(--color-app-text-muted) !important;
+          font-style: italic;
         }
       `}</style>
     </div>
