@@ -25,6 +25,11 @@ import NewsViewerPage from "../pages/NewsPage/NewsViewerPage";
 import QuantumPlayground from "../pages/QuantumPlayground/QuantumPlayground";
 import BlogViewerPage from "../pages/BlogViewerPage/BlogViewerPage";
 import EntanglementLabPage from "../pages/EntanglementLabPage/EntanglementLabPage";
+import AdminUserAnalytics from "../pages/AdminPanel/AdminUserAnalytics";
+import AdminUsersManager from "../pages/AdminPanel/AdminUsersManager";
+import AdminCoursesManager from "../pages/AdminPanel/AdminCoursesManager";
+import CoursesPage from "../pages/CoursesPage/CoursesPage";
+import CourseViewerPage from "../pages/CoursesPage/CourseViewerPage";
 
 /**
  * Application routes.
@@ -41,6 +46,11 @@ export default function AppRoutes() {
         <Route path="/docs" element={<AnimatedPage><DocsPage /></AnimatedPage>} />
         <Route path="/news" element={<AnimatedPage><NewsPage /></AnimatedPage>} />
         <Route path="/news/:id" element={<AnimatedPage><NewsViewerPage /></AnimatedPage>} />
+        
+        <Route path="/courses" element={<AnimatedPage><CoursesPage /></AnimatedPage>} />
+        <Route path="/courses/:id" element={<AnimatedPage><CourseViewerPage /></AnimatedPage>} />
+        
+        <Route path="/entanglement-lab" element={<ProtectedRoute><AnimatedPage><EntanglementLabPage /></AnimatedPage></ProtectedRoute>} />
         <Route path="/blogs" element={<AnimatedPage><BlogsPage /></AnimatedPage>} />
         <Route path="/blogs/:id" element={<AnimatedPage><BlogViewerPage /></AnimatedPage>} />
 
@@ -62,9 +72,12 @@ export default function AppRoutes() {
 
           {/* ─── Admin Routes ──────────────────────────────────── */}
           <Route path="/admin" element={<ProtectedRoute adminOnly={true}><AnimatedPage><AdminDashboard /></AnimatedPage></ProtectedRoute>} />
+          <Route path="/admin/user-analytics" element={<ProtectedRoute adminOnly={true}><AnimatedPage><AdminUserAnalytics /></AnimatedPage></ProtectedRoute>} />
+          <Route path="/admin/users" element={<ProtectedRoute adminOnly={true}><AnimatedPage><AdminUsersManager /></AnimatedPage></ProtectedRoute>} />
           <Route path="/admin/news" element={<ProtectedRoute adminOnly={true}><AnimatedPage><AdminNewsManager /></AnimatedPage></ProtectedRoute>} />
           <Route path="/admin/blogs" element={<ProtectedRoute adminOnly={true}><AnimatedPage><AdminBlogsManager /></AnimatedPage></ProtectedRoute>} />
           <Route path="/admin/docs" element={<ProtectedRoute adminOnly={true}><AnimatedPage><AdminDocsManager /></AnimatedPage></ProtectedRoute>} />
+          <Route path="/admin/courses" element={<ProtectedRoute adminOnly={true}><AnimatedPage><AdminCoursesManager /></AnimatedPage></ProtectedRoute>} />
           <Route path="/admin/playground" element={<ProtectedRoute adminOnly={true}><AnimatedPage><AdminChallengesManager /></AnimatedPage></ProtectedRoute>} />
           <Route path="/admin/add-algorithm" element={<ProtectedRoute adminOnly={true}><AnimatedPage><AdminAddAlgorithm /></AnimatedPage></ProtectedRoute>} />
           <Route

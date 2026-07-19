@@ -4,6 +4,7 @@ import { AlgorithmProvider } from "./context/AlgorithmContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import AppRoutes from "./routes/AppRoutes";
 import useSmoothScroll from "./hooks/useSmoothScroll";
+import usePageTracking from "./hooks/usePageTracking";
 
 /**
  * Inner app component that uses the smooth scroll hook.
@@ -11,24 +12,31 @@ import useSmoothScroll from "./hooks/useSmoothScroll";
  */
 function AppInner() {
   useSmoothScroll();
+  usePageTracking();
   return <AppRoutes />;
 }
+
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 /**
  * Root Application Component
  * Wraps the app in ThemeProvider, Router, AuthProvider, and AlgorithmProvider.
  */
 function App() {
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "no-client-id";
+
   return (
-    <ThemeProvider>
-      <BrowserRouter>
-        <AuthProvider>
-          <AlgorithmProvider>
-            <AppInner />
-          </AlgorithmProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </ThemeProvider>
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <ThemeProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <AlgorithmProvider>
+              <AppInner />
+            </AlgorithmProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </ThemeProvider>
+    </GoogleOAuthProvider>
   );
 }
 

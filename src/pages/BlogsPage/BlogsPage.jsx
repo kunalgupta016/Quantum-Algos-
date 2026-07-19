@@ -11,13 +11,31 @@ export default function BlogsPage() {
   const [blogPosts, setBlogPosts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 12;
 
   useEffect(() => {
     async function loadBlogs() {
       try {
-        const data = await getBlogs();
-        setBlogPosts(data);
-        const cats = [...new Set(data.map(p => p.category))];
+        setLoading(true);
+        const data = await getBlogs(page, limit);
+        
+        let allDataForCats = [];
+        // Extract unique categories (for this we could fetch a separate API or just use the current page's categories,
+        // but for simplicity we'll just use the current page's categories)
+        if (data.data) {
+          setBlogPosts(data.data);
+          setTotalPages(data.totalPages);
+          allDataForCats = data.data;
+        } else {
+          setBlogPosts(data);
+          setTotalPages(1);
+          allDataForCats = data;
+        }
+        
+        // We only extract categories from the loaded blogs. In a full system, you'd fetch all unique categories.
+        const cats = [...new Set(allDataForCats.map(p => p.category))];
         setCategories(cats);
       } catch (err) {
         console.error("Failed to load blogs", err);
@@ -26,7 +44,7 @@ export default function BlogsPage() {
       }
     }
     loadBlogs();
-  }, []);
+  }, [page]);
 
   if (loading) {
     return (
@@ -140,6 +158,27 @@ export default function BlogsPage() {
             </motion.article>
           ))}
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "1rem", marginTop: "3rem" }}>
+            <button 
+              onClick={() => { setPage((p) => Math.max(1, p - 1)); window.scrollTo(0, 0); }} 
+              disabled={page === 1} 
+              style={{ padding: "0.5rem 1rem", borderRadius: "0.5rem", border: "1px solid var(--color-app-border)", background: "var(--color-app-base)", color: "var(--color-app-text-main)", opacity: page === 1 ? 0.5 : 1, cursor: page === 1 ? "not-allowed" : "pointer" }}
+            >
+              Previous
+            </button>
+            <span style={{ fontSize: "0.9rem", color: "var(--color-app-text-muted)" }}>Page {page} of {totalPages}</span>
+            <button 
+              onClick={() => { setPage((p) => Math.min(totalPages, p + 1)); window.scrollTo(0, 0); }} 
+              disabled={page === totalPages} 
+              style={{ padding: "0.5rem 1rem", borderRadius: "0.5rem", border: "1px solid var(--color-app-border)", background: "var(--color-app-base)", color: "var(--color-app-text-main)", opacity: page === totalPages ? 0.5 : 1, cursor: page === totalPages ? "not-allowed" : "pointer" }}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
 
       <Footer />

@@ -21,12 +21,22 @@ export default function NewsPage() {
   const navigate = useNavigate();
   const [newsItems, setNewsItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 13; // 1 for featured + 12 for grid
 
   useEffect(() => {
     async function loadNews() {
       try {
-        const data = await getNews();
-        setNewsItems(data);
+        setLoading(true);
+        const data = await getNews(page, limit);
+        if (data.data) {
+          setNewsItems(data.data);
+          setTotalPages(data.totalPages);
+        } else {
+          setNewsItems(data);
+          setTotalPages(1);
+        }
       } catch (err) {
         console.error("Failed to load news", err);
       } finally {
@@ -34,7 +44,7 @@ export default function NewsPage() {
       }
     }
     loadNews();
-  }, []);
+  }, [page]);
 
   if (loading) {
     return (
@@ -45,7 +55,7 @@ export default function NewsPage() {
     );
   }
 
-  const featuredNews = newsItems.find(n => n.isFeatured) || newsItems[0];
+  const featuredNews = page === 1 ? (newsItems.find(n => n.isFeatured) || newsItems[0]) : null;
   const otherNews = newsItems.filter(n => n._id !== (featuredNews ? featuredNews._id : null));
   return (
     <div style={{ minHeight: "100vh", background: "var(--color-app-base)", color: "var(--color-app-text-main)" }}>
@@ -162,6 +172,28 @@ export default function NewsPage() {
             </motion.div>
           ))}
         </div>
+
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "1rem", marginTop: "3rem" }}>
+            <button 
+              onClick={() => { setPage((p) => Math.max(1, p - 1)); window.scrollTo(0, 0); }} 
+              disabled={page === 1} 
+              style={{ padding: "0.5rem 1rem", borderRadius: "0.5rem", border: "1px solid var(--color-app-border)", background: "var(--color-app-base)", color: "var(--color-app-text-main)", opacity: page === 1 ? 0.5 : 1, cursor: page === 1 ? "not-allowed" : "pointer" }}
+            >
+              Previous
+            </button>
+            <span style={{ fontSize: "0.9rem", color: "var(--color-app-text-muted)" }}>Page {page} of {totalPages}</span>
+            <button 
+              onClick={() => { setPage((p) => Math.min(totalPages, p + 1)); window.scrollTo(0, 0); }} 
+              disabled={page === totalPages} 
+              style={{ padding: "0.5rem 1rem", borderRadius: "0.5rem", border: "1px solid var(--color-app-border)", background: "var(--color-app-base)", color: "var(--color-app-text-main)", opacity: page === totalPages ? 0.5 : 1, cursor: page === totalPages ? "not-allowed" : "pointer" }}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
 
       <Footer />

@@ -89,7 +89,7 @@ export default function QuantumPlayground() {
             </span>
           </div>
           <h1 style={{ fontSize: "2rem", fontWeight: 800, color: "var(--color-app-text-main)", marginBottom: "0.5rem" }}>
-            Welcome, {user?.username}!
+            Welcome, {user?.name || user?.username}!
           </h1>
           <p style={{ fontSize: "0.9rem", color: "var(--color-app-text-muted)" }}>
             Interactive quantum computing experiments and challenges

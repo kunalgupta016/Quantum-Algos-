@@ -53,7 +53,7 @@ export default function DashboardPage() {
               <div className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 mb-3" style={{ borderColor: "var(--color-app-accent)", background: "rgba(139,92,246,0.1)" }}>
                 <span className="app-pulse-dot" />
                 <span className="text-xs font-bold uppercase tracking-[0.15em]" style={{ color: "var(--color-app-accent)" }}>
-                  Welcome, {user?.username || "User"}
+                  Welcome, {user?.name || user?.username || "User"}
                 </span>
               </div>
               <h1 className="text-3xl font-extrabold tracking-tight" style={{ color: "var(--color-app-text-main)" }}>

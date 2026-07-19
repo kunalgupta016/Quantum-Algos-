@@ -7,19 +7,33 @@ export default function AdminBlogsManager() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   
+  // Pagination & Search
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState("");
+  const limit = 10;
+  
   const [formData, setFormData] = useState({
     title: "", category: "", readTime: "", date: "", author: "", excerpt: "", content: ""
   });
   const fileInputRef = useRef(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+
   useEffect(() => {
     fetchBlogs();
-  }, []);
+  }, [page, search]);
 
   async function fetchBlogs() {
     try {
-      const data = await getBlogs();
-      setBlogs(data);
+      setLoading(true);
+      const data = await getBlogs(page, limit, search);
+      if (data.data) {
+        setBlogs(data.data);
+        setTotalPages(data.totalPages);
+      } else {
+        setBlogs(data);
+        setTotalPages(1);
+      }
     } catch (err) {
       console.error(err);
       alert("Failed to load blogs");
@@ -83,7 +97,7 @@ def quantum_func():
     }
 
     try {
-      if (editingId) {
+      if (editingId && editingId !== 'new') {
         await updateBlog(editingId, formData);
         alert("Blog updated successfully");
       } else {
@@ -177,14 +191,41 @@ def quantum_func():
   if (loading) return <div className="p-10 text-[var(--color-app-text-main)]">Loading...</div>;
 
   return (
-    <div className="flex-1 overflow-y-auto bg-[var(--color-app-base)] p-8" data-lenis-prevent="true">
+    <div className="flex-1 overflow-y-auto bg-[var(--color-app-base)] p-8 pb-24" data-lenis-prevent="true">
       <div className="max-w-5xl mx-auto text-[var(--color-app-text-main)]">
-        <h1 className="text-2xl font-bold mb-8">✍️ Manage Blogs</h1>
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+          <h1 className="text-3xl font-extrabold text-[var(--color-app-text-main)]">Blog Management</h1>
+          <div className="flex gap-4">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search blogs..."
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+                className="w-full md:w-64 rounded-lg px-4 py-2 pl-10 text-sm outline-none transition-all"
+                style={{ border: "1px solid var(--color-app-border)", background: "var(--color-app-base)", color: "var(--color-app-text-main)" }}
+              />
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-app-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <button
+              onClick={() => { handleCancel(); setEditingId('new'); }}
+              className="px-4 py-2 bg-[var(--color-app-primary)] text-white rounded-lg hover:brightness-110 font-bold shadow-lg shadow-purple-500/20"
+            >
+              + Create Blog
+            </button>
+          </div>
+        </div>
 
+        {editingId && (
         <div className="bg-[var(--color-app-surface)] p-6 rounded-xl border border-[var(--color-app-border)] mb-8">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-bold">{editingId ? "Edit Blog" : "Add New Blog"}</h2>
-            {!editingId && (
+            <h2 className="text-lg font-bold">{editingId !== 'new' ? "Edit Blog" : "Add New Blog"}</h2>
+            {editingId === 'new' && (
               <button 
                 type="button" 
                 onClick={handleUseTemplate}
@@ -240,16 +281,15 @@ def quantum_func():
             
             <div className="flex gap-3 mt-4">
               <button type="submit" className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-2 rounded font-bold text-sm transition">
-                {editingId ? "Update Blog" : "Add Blog"}
+                {editingId !== 'new' ? "Update Blog" : "Add Blog"}
               </button>
-              {editingId && (
-                <button type="button" onClick={handleCancel} className="bg-[var(--color-app-surface-hover)] border border-[var(--color-app-border)] px-6 py-2 rounded font-bold text-sm text-[var(--color-app-text-main)]">
-                  Cancel
-                </button>
-              )}
+              <button type="button" onClick={handleCancel} className="bg-[var(--color-app-surface-hover)] border border-[var(--color-app-border)] px-6 py-2 rounded font-bold text-sm text-[var(--color-app-text-main)]">
+                Cancel
+              </button>
             </div>
           </form>
         </div>
+        )}
 
         <div className="flex flex-col gap-3">
           {blogs.map(item => (
@@ -265,6 +305,15 @@ def quantum_func():
             </div>
           ))}
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && !editingId && (
+          <div className="flex justify-center items-center gap-4 mt-8">
+            <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="px-4 py-2 rounded-lg border border-[var(--color-app-border)] bg-[var(--color-app-base)] text-[var(--color-app-text-main)] disabled:opacity-50 hover:bg-[rgba(255,255,255,0.05)]">Previous</button>
+            <span className="text-sm font-medium text-[var(--color-app-text-muted)]">Page {page} of {totalPages}</span>
+            <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="px-4 py-2 rounded-lg border border-[var(--color-app-border)] bg-[var(--color-app-base)] text-[var(--color-app-text-main)] disabled:opacity-50 hover:bg-[rgba(255,255,255,0.05)]">Next</button>
+          </div>
+        )}
       </div>
     </div>
   );

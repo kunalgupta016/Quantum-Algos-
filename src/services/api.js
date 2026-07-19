@@ -6,11 +6,11 @@ import axios from "axios";
  * VITE_API_BASE_URL should be set in .env.production for deployment.
  */
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
+  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api";
 
 // Server root URL (without /api) — used for image URLs, etc.
 export const API_SERVER_URL =
-  import.meta.env.VITE_API_SERVER_URL || "http://localhost:8000";
+  import.meta.env.VITE_API_SERVER_URL || "http://127.0.0.1:8000";
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -36,8 +36,13 @@ export async function loginUser(username, password) {
   return response.data;
 }
 
-export async function registerUser(username, password) {
-  const response = await apiClient.post("/auth/register", { username, password });
+export async function registerUser(userData) {
+  const response = await apiClient.post("/auth/register", userData);
+  return response.data;
+}
+
+export async function googleLoginUser(token, os) {
+  const response = await apiClient.post("/auth/google-login", { token, os });
   return response.data;
 }
 
@@ -140,8 +145,12 @@ export async function deleteDoc(id) {
 }
 
 // --- Blogs ---
-export async function getBlogs() {
-  const res = await apiClient.get("/blogs");
+export async function getBlogs(page = 1, limit = 0, search = "") {
+  const params = new URLSearchParams();
+  if (page) params.append("page", page);
+  if (limit) params.append("limit", limit);
+  if (search) params.append("search", search);
+  const res = await apiClient.get(`/blogs?${params.toString()}`);
   return res.data;
 }
 export async function createBlog(data) {
@@ -168,8 +177,12 @@ export async function commentBlog(id, text) {
 }
 
 // --- News ---
-export async function getNews() {
-  const res = await apiClient.get("/news");
+export async function getNews(page = 1, limit = 0, search = "") {
+  const params = new URLSearchParams();
+  if (page) params.append("page", page);
+  if (limit) params.append("limit", limit);
+  if (search) params.append("search", search);
+  const res = await apiClient.get(`/news?${params.toString()}`);
   return res.data;
 }
 export async function createNews(data) {
@@ -229,5 +242,33 @@ export async function deleteChallenge(id) {
   const response = await apiClient.delete(`/admin/challenges/${id}`);
   return response.data;
 }
+
+// ----------------------------------------------------
+// Courses API (Phase 5)
+// ----------------------------------------------------
+export const getCourses = async () => {
+  const res = await apiClient.get("/courses");
+  return res.data;
+};
+
+export const getCourseById = async (id) => {
+  const res = await apiClient.get(`/courses/${id}`);
+  return res.data;
+};
+
+export const createCourse = async (data) => {
+  const res = await apiClient.post("/courses", data);
+  return res.data;
+};
+
+export const updateCourse = async (id, data) => {
+  const res = await apiClient.put(`/courses/${id}`, data);
+  return res.data;
+};
+
+export const deleteCourse = async (id) => {
+  const res = await apiClient.delete(`/courses/${id}`);
+  return res.data;
+};
 
 export default apiClient;

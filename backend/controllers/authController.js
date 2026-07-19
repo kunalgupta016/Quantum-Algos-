@@ -19,10 +19,10 @@ function generateToken(user) {
  */
 async function register(req, res) {
   try {
-    const { username, password } = req.body;
+    const { username, password, name, email, dob, gender, phone, os } = req.body;
 
-    if (!username || !password) {
-      return res.status(400).json({ error: "Username and password are required." });
+    if (!username || !password || !name || !email || !dob || !gender || !phone) {
+      return res.status(400).json({ error: "All fields are required." });
     }
 
     if (password.length < 6) {
@@ -30,20 +30,30 @@ async function register(req, res) {
     }
 
     // Check if user already exists
-    const existingUser = await User.findOne({ username });
+    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
     if (existingUser) {
-      return res.status(409).json({ error: "Username already taken." });
+      return res.status(409).json({ error: "Username or Email already taken." });
     }
 
     // Create user (always 'user' role — admin is created via seed only)
-    const user = new User({ username, password, role: "user" });
+    const user = new User({ 
+      username, 
+      password, 
+      name, 
+      email, 
+      dob, 
+      gender, 
+      phone, 
+      os,
+      role: "user" 
+    });
     await user.save();
 
     const token = generateToken(user);
 
     res.status(201).json({
       token,
-      user: { id: user._id, username: user.username, role: user.role },
+      user: { id: user._id, username: user.username, role: user.role, name: user.name },
     });
   } catch (error) {
     console.error("Register error:", error);
@@ -77,7 +87,7 @@ async function login(req, res) {
 
     res.json({
       token,
-      user: { id: user._id, username: user.username, role: user.role },
+      user: { id: user._id, username: user.username, role: user.role, name: user.name },
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -95,10 +105,65 @@ async function getMe(req, res) {
     if (!user) {
       return res.status(404).json({ error: "User not found." });
     }
-    res.json({ id: user._id, username: user.username, role: user.role });
+    res.json({ id: user._id, username: user.username, role: user.role, name: user.name });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch user." });
   }
 }
 
-module.exports = { register, login, getMe };
+const { OAuth2Client } = require("google-auth-library");
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+/**
+ * POST /api/auth/google-login
+ * Logs in or registers a user via Google ID Token.
+ */
+async function googleLogin(req, res) {
+  try {
+    const { token, os } = req.body;
+    if (!token) {
+      return res.status(400).json({ error: "No token provided." });
+    }
+
+    // Verify Google token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const { email, name, sub } = payload; // sub is the unique Google user ID
+
+    // Check if user exists by email
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // Create a new user for Google login
+      // We set a random password since they won't use it to login natively
+      const randomPassword = Math.random().toString(36).slice(-10) + "A1!";
+      
+      user = new User({
+        username: email.split("@")[0] + Math.floor(Math.random() * 1000), // e.g. john123
+        name: name,
+        email: email,
+        password: randomPassword, 
+        dob: "2000-01-01", // Default placeholder for Google users
+        gender: "Other", // Default placeholder
+        phone: "0000000000",
+        os: os || "Unknown",
+        role: "user"
+      });
+      await user.save();
+    }
+
+    const jwtToken = generateToken(user);
+    res.json({
+      token: jwtToken,
+      user: { id: user._id, username: user.username, role: user.role, name: user.name },
+    });
+  } catch (error) {
+    console.error("Google login error:", error);
+    res.status(401).json({ error: "Invalid Google token." });
+  }
+}
+
+module.exports = { register, login, getMe, googleLogin };

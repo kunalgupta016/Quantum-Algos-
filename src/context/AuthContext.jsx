@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
-import { loginUser, registerUser, getCurrentUser } from "../services/api";
+import { loginUser, registerUser, getCurrentUser, googleLoginUser } from "../services/api";
 
 const AuthContext = createContext(null);
 
@@ -46,8 +46,16 @@ export function AuthProvider({ children }) {
     return data.user;
   }, []);
 
-  const register = useCallback(async (username, password) => {
-    const data = await registerUser(username, password);
+  const register = useCallback(async (userData) => {
+    const data = await registerUser(userData);
+    localStorage.setItem("qsl_token", data.token);
+    setToken(data.token);
+    setUser(data.user);
+    return data.user;
+  }, []);
+
+  const googleLogin = useCallback(async (googleToken, os) => {
+    const data = await googleLoginUser(googleToken, os);
     localStorage.setItem("qsl_token", data.token);
     setToken(data.token);
     setUser(data.user);
@@ -68,6 +76,7 @@ export function AuthProvider({ children }) {
     loading,
     login,
     register,
+    googleLogin,
     logout,
   };
 

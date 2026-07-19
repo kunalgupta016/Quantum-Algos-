@@ -3,6 +3,7 @@ const Blog = require("../models/Blog");
 const News = require("../models/News");
 const { JSDOM } = require("jsdom");
 const createDOMPurify = require("dompurify");
+const { invalidateCache } = require("../middleware/cache");
 
 // Create a DOMPurify instance for server-side HTML sanitization
 const window = new JSDOM("").window;
@@ -37,6 +38,7 @@ async function addDoc(req, res) {
     if (data.content) data.content = sanitizeHTML(data.content);
     const doc = new Doc(data);
     await doc.save();
+    await invalidateCache("docs");
     res.status(201).json(doc);
   } catch (error) {
     res.status(500).json({ error: "Failed to add doc." });
@@ -49,6 +51,7 @@ async function updateDoc(req, res) {
     if (data.content) data.content = sanitizeHTML(data.content);
     const doc = await Doc.findByIdAndUpdate(req.params.id, data, { new: true });
     if (!doc) return res.status(404).json({ error: "Doc not found" });
+    await invalidateCache("docs");
     res.json(doc);
   } catch (error) {
     res.status(500).json({ error: "Failed to update doc." });
@@ -59,6 +62,7 @@ async function deleteDoc(req, res) {
   try {
     const doc = await Doc.findByIdAndDelete(req.params.id);
     if (!doc) return res.status(404).json({ error: "Doc not found" });
+    await invalidateCache("docs");
     res.json({ message: "Doc deleted" });
   } catch (error) {
     res.status(500).json({ error: "Failed to delete doc." });
@@ -80,6 +84,7 @@ async function reorderDocs(req, res) {
     }));
 
     await Doc.bulkWrite(bulkOps);
+    await invalidateCache("docs");
     res.json({ message: "Docs reordered successfully" });
   } catch (error) {
     console.error("Reorder error:", error);
@@ -90,8 +95,40 @@ async function reorderDocs(req, res) {
 // --- Blogs ---
 async function getBlogs(req, res) {
   try {
-    const blogs = await Blog.find().sort({ updatedAt: -1 });
-    res.json(blogs);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 0; // 0 means no limit (backward compatibility)
+    const search = req.query.search || "";
+
+    const query = {};
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { author: { $regex: search, $options: "i" } }
+      ];
+    }
+
+    let blogsQuery = Blog.find(query).sort({ createdAt: -1 });
+    
+    if (limit > 0) {
+      const skip = (page - 1) * limit;
+      blogsQuery = blogsQuery.skip(skip).limit(limit);
+    }
+
+    const [blogs, totalBlogs] = await Promise.all([
+      blogsQuery,
+      Blog.countDocuments(query)
+    ]);
+
+    if (limit > 0) {
+      res.json({
+        data: blogs,
+        currentPage: page,
+        totalPages: Math.ceil(totalBlogs / limit),
+        totalItems: totalBlogs
+      });
+    } else {
+      res.json(blogs); // Backward compatibility
+    }
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch blogs." });
   }
@@ -103,6 +140,7 @@ async function addBlog(req, res) {
     if (data.content) data.content = sanitizeHTML(data.content);
     const blog = new Blog(data);
     await blog.save();
+    await invalidateCache("blogs");
     res.status(201).json(blog);
   } catch (error) {
     res.status(500).json({ error: "Failed to add blog." });
@@ -115,6 +153,7 @@ async function updateBlog(req, res) {
     if (data.content) data.content = sanitizeHTML(data.content);
     const blog = await Blog.findByIdAndUpdate(req.params.id, data, { new: true });
     if (!blog) return res.status(404).json({ error: "Blog not found" });
+    await invalidateCache("blogs");
     res.json(blog);
   } catch (error) {
     res.status(500).json({ error: "Failed to update blog." });
@@ -125,6 +164,7 @@ async function deleteBlog(req, res) {
   try {
     const blog = await Blog.findByIdAndDelete(req.params.id);
     if (!blog) return res.status(404).json({ error: "Blog not found" });
+    await invalidateCache("blogs");
     res.json({ message: "Blog deleted" });
   } catch (error) {
     res.status(500).json({ error: "Failed to delete blog." });
@@ -134,8 +174,40 @@ async function deleteBlog(req, res) {
 // --- News ---
 async function getNews(req, res) {
   try {
-    const news = await News.find().sort({ createdAt: -1 });
-    res.json(news);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 0;
+    const search = req.query.search || "";
+
+    const query = {};
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { summary: { $regex: search, $options: "i" } }
+      ];
+    }
+
+    let newsQuery = News.find(query).sort({ createdAt: -1 });
+
+    if (limit > 0) {
+      const skip = (page - 1) * limit;
+      newsQuery = newsQuery.skip(skip).limit(limit);
+    }
+
+    const [news, totalNews] = await Promise.all([
+      newsQuery,
+      News.countDocuments(query)
+    ]);
+
+    if (limit > 0) {
+      res.json({
+        data: news,
+        currentPage: page,
+        totalPages: Math.ceil(totalNews / limit),
+        totalItems: totalNews
+      });
+    } else {
+      res.json(news);
+    }
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch news." });
   }
@@ -145,6 +217,7 @@ async function addNews(req, res) {
   try {
     const newsItem = new News(req.body);
     await newsItem.save();
+    await invalidateCache("news");
     res.status(201).json(newsItem);
   } catch (error) {
     res.status(500).json({ error: "Failed to add news." });
@@ -155,6 +228,7 @@ async function updateNews(req, res) {
   try {
     const newsItem = await News.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!newsItem) return res.status(404).json({ error: "News not found" });
+    await invalidateCache("news");
     res.json(newsItem);
   } catch (error) {
     res.status(500).json({ error: "Failed to update news." });
@@ -165,6 +239,7 @@ async function deleteNews(req, res) {
   try {
     const newsItem = await News.findByIdAndDelete(req.params.id);
     if (!newsItem) return res.status(404).json({ error: "News not found" });
+    await invalidateCache("news");
     res.json({ message: "News deleted" });
   } catch (error) {
     res.status(500).json({ error: "Failed to delete news." });
@@ -192,6 +267,7 @@ async function likeBlog(req, res) {
     }
     
     await blog.save();
+    await invalidateCache("blogs");
     res.json({ message: hasLiked ? "Unliked" : "Liked", likes: blog.likes });
   } catch (error) {
     res.status(500).json({ error: "Failed to like blog." });
@@ -220,6 +296,7 @@ async function commentBlog(req, res) {
 
     blog.comments.push(newComment);
     await blog.save();
+    await invalidateCache("blogs");
 
     res.status(201).json({ message: "Comment added", comments: blog.comments });
   } catch (error) {

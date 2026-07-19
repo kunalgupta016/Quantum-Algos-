@@ -21,12 +21,19 @@ Sir ko apne account se [Cloudinary](https://cloudinary.com/) par sign up karna h
 ---
 
 ## 2. MongoDB Setup (For Database)
-Sir ko [MongoDB Atlas](https://www.mongodb.com/) par account banakar ek naya cluster (database) create karna hoga.
-1. Cluster banne ke baad `Connect` -> `Drivers` par click karne se ek **Connection String** (Mongo URI) milegi.
-2. **Kahan change karein:**
-   Code ki `.env` file me `MONGO_URI` ke aage is nayi link ko daal dein:
-   ```env
-   MONGO_URI=mongodb+srv://sir_username:password@cluster...
+### 1. Database (MongoDB)
+1. Go to [MongoDB Atlas](https://www.mongodb.com/) and create a free account.
+2. Build a Database (Free cluster).
+3. Under **Security > Database Access**, add a new database user (remember the username and password).
+4. Under **Security > Network Access**, click "Add IP Address" and select "Allow Access from Anywhere" (`0.0.0.0/0`).
+5. Click **Connect > Drivers** on your cluster and copy the connection string. It will look like:
+   `mongodb+srv://<username>:<password>@cluster0...`
+6. **Import Existing Data (Optional but Recommended):**
+   - We have provided a backup of your current database inside `backend/db_backup/`.
+   - To import this data into your newly created MongoDB cluster, simply update the `MONGO_URI` in the `.env` file (see Step 4) with your new connection string.
+   - Then open your terminal/command prompt, navigate to the backend folder (`cd backend`), and run:
+     `node scripts/import_db.js`
+   - This will automatically import all algorithms, docs, blogs, and news into your new cloud database!
    ```
    *(Note: Link me `<password>` ki jagah sir ko apna database password daalna hoga).*
 

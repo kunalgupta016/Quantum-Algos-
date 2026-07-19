@@ -1,5 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import AdminUserAnalytics from "./AdminUserAnalytics";
+import AdminUsersManager from "./AdminUsersManager";
+import AdminCoursesManager from "./AdminCoursesManager";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -39,6 +42,27 @@ export default function AdminDashboard() {
       icon: "🎮",
       path: "/admin/playground",
       color: "from-yellow-500 to-orange-600",
+    },
+    {
+      title: "User Analytics",
+      desc: "View user demographics, OS, and age distributions",
+      icon: "📊",
+      path: "/admin/user-analytics",
+      color: "from-cyan-500 to-blue-600",
+    },
+    {
+      title: "User Management",
+      desc: "View all users, promote to Admin, or demote to User",
+      icon: "👥",
+      path: "/admin/users",
+      color: "from-rose-500 to-red-600",
+    },
+    {
+      title: "Courses Manager",
+      desc: "Manage free video lectures and courses",
+      icon: "🎓",
+      path: "/admin/courses",
+      color: "from-green-500 to-emerald-600",
     }
   ];
 

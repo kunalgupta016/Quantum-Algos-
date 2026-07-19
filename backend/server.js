@@ -24,6 +24,9 @@ const contentRoutes = require("./routes/contentRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const challengeRoutes = require("./routes/challengeRoutes");
 const playgroundRoutes = require("./routes/playgroundRoutes");
+const analyticsRoutes = require("./routes/analyticsRoutes");
+const userRoutes = require("./routes/userRoutes");
+const courseRoutes = require("./routes/courseRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -37,6 +40,9 @@ app.use(helmet({
 // ─── Security: CORS ──────────────────────────────
 const allowedOrigins = [
   "http://localhost:5173",
+  "http://localhost:5174",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:5174",
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
@@ -93,6 +99,9 @@ app.use("/api", contentRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api", challengeRoutes);
 app.use("/api", playgroundRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/courses", courseRoutes);
 
 // ─── Health check ────────────────────────────────
 app.get("/", (req, res) => {
@@ -121,9 +130,12 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || "Internal Server Error" });
 });
 
+const { initRedis } = require("./middleware/cache");
+
 // ─── Start Server with DB Connection ─────────────
 async function startServer() {
   await connectDB();
+  await initRedis();
 
   app.listen(PORT, () => {
     console.log(`\n  🚀 Quantum Simulation Lab API running at http://localhost:${PORT}`);

@@ -13,9 +13,10 @@ export const APP_ORG_SHORT = "DRDO";
  * Public navigation links (shown in main navbar)
  */
 export const PUBLIC_NAV_LINKS = [
-  { label: "Blogs", path: "/blogs" },
-  { label: "News", path: "/news" },
-  { label: "Docs", path: "/docs" },
+  { path: "/docs", label: "Docs" },
+  { path: "/blogs", label: "Blogs" },
+  { path: "/news", label: "News" },
+  { path: "/courses", label: "Courses" },
 ];
 
 /**
