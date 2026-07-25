@@ -31,3 +31,7 @@ backend/uploads/
 *.njsproj
 *.sln
 *.sw?
+
+.zip
+QuantumLab_Project.zip
+AI_CONTEXT.zip

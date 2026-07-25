@@ -27,6 +27,7 @@ const playgroundRoutes = require("./routes/playgroundRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const userRoutes = require("./routes/userRoutes");
 const courseRoutes = require("./routes/courseRoutes");
+const gnewsRoutes = require("./routes/gnewsRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -102,6 +103,7 @@ app.use("/api", playgroundRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/courses", courseRoutes);
+app.use("/api/gnews", gnewsRoutes);
 
 // ─── Health check ────────────────────────────────
 app.get("/", (req, res) => {

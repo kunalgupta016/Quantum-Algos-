@@ -198,6 +198,24 @@ export async function deleteNews(id) {
   return res.data;
 }
 
+// --- GNews (Live External News) ---
+export async function searchGNews(query = "quantum computing", page = 1, max = 10) {
+  const params = new URLSearchParams();
+  params.append("q", query);
+  params.append("page", page);
+  params.append("max", max);
+  const res = await apiClient.get(`/gnews/search?${params.toString()}`);
+  return res.data;
+}
+
+export async function getGNewsHeadlines(topic = "technology", max = 10) {
+  const params = new URLSearchParams();
+  params.append("topic", topic);
+  params.append("max", max);
+  const res = await apiClient.get(`/gnews/top-headlines?${params.toString()}`);
+  return res.data;
+}
+
 // ═══════════════════════════════════════════════════════
 // UPLOAD APIs
 // ═══════════════════════════════════════════════════════
