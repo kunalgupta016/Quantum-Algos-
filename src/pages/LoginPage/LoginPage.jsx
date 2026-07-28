@@ -19,11 +19,11 @@ function getOS() {
   return 'Unknown';
 }
 
-export default function LoginPage() {
+export default function LoginPage({ defaultRegister = false }) {
   const { login, register, googleLogin, isLoggedIn } = useAuth();
   const navigate = useNavigate();
 
-  const [isRegisterMode, setIsRegisterMode] = useState(false);
+  const [isRegisterMode, setIsRegisterMode] = useState(defaultRegister);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -349,40 +349,46 @@ export default function LoginPage() {
             </motion.button>
           </form>
 
-          <div className="mt-6 flex flex-col items-center gap-4">
-            <div className="w-full flex items-center justify-center">
-              <div className="h-px bg-gray-600/30 flex-1"></div>
-              <span className="px-3 text-xs uppercase" style={{ color: "var(--color-app-text-muted)" }}>or continue with</span>
-              <div className="h-px bg-gray-600/30 flex-1"></div>
+          {!isRegisterMode && (
+            <div className="mt-6 flex flex-col items-center gap-4">
+              <div className="w-full flex items-center justify-center">
+                <div className="h-px bg-gray-600/30 flex-1"></div>
+                <span className="px-3 text-xs uppercase" style={{ color: "var(--color-app-text-muted)" }}>or continue with</span>
+                <div className="h-px bg-gray-600/30 flex-1"></div>
+              </div>
+              
+              <GoogleLogin
+                onSuccess={async (credentialResponse) => {
+                  setLoading(true);
+                  setError("");
+                  try {
+                    const os = getOS();
+                    await googleLogin(credentialResponse.credential, os);
+                    navigate("/dashboard");
+                  } catch (err) {
+                    setError(err.response?.data?.error || "Google login failed.");
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                onError={() => {
+                  setError("Google login was unsuccessful.");
+                }}
+                theme="filled_black"
+                shape="pill"
+              />
             </div>
-            
-            <GoogleLogin
-              onSuccess={async (credentialResponse) => {
-                setLoading(true);
-                setError("");
-                try {
-                  const os = getOS();
-                  await googleLogin(credentialResponse.credential, os);
-                  navigate("/dashboard");
-                } catch (err) {
-                  setError(err.response?.data?.error || "Google login failed.");
-                } finally {
-                  setLoading(false);
-                }
-              }}
-              onError={() => {
-                setError("Google login was unsuccessful.");
-              }}
-              theme="filled_black"
-              shape="pill"
-            />
-          </div>
+          )}
 
           <div className="mt-6 text-center">
             <button
               onClick={() => {
-                setIsRegisterMode(!isRegisterMode);
                 setError("");
+                if (isRegisterMode) {
+                  navigate("/login");
+                } else {
+                  navigate("/register");
+                }
               }}
               className="text-xs transition-colors"
               style={{ color: "var(--color-app-text-muted)" }}

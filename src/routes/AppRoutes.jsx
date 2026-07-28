@@ -43,6 +43,7 @@ export default function AppRoutes() {
         {/* Public routes (with their own Navbar inside) */}
         <Route path="/" element={<AnimatedPage><LandingPage /></AnimatedPage>} />
         <Route path="/login" element={<AnimatedPage><LoginPage /></AnimatedPage>} />
+        <Route path="/register" element={<AnimatedPage><LoginPage defaultRegister /></AnimatedPage>} />
         <Route path="/docs" element={<AnimatedPage><DocsPage /></AnimatedPage>} />
         <Route path="/news" element={<AnimatedPage><NewsPage /></AnimatedPage>} />
         <Route path="/news/:id" element={<AnimatedPage><NewsViewerPage /></AnimatedPage>} />

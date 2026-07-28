@@ -157,7 +157,7 @@ export default function Navbar() {
             ) : (
               <>
                 <button
-                  onClick={() => { navigate("/login"); setMobileOpen(false); }}
+                  onClick={() => { navigate("/register"); setMobileOpen(false); }}
                   className="nav-btn-outline w-full text-center py-2"
                 >
                   Register
@@ -199,7 +199,7 @@ export default function Navbar() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => navigate("/login")}
+                onClick={() => navigate("/register")}
                 className="nav-btn-outline hidden md:block"
               >
                 Register
